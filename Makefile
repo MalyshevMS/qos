@@ -1,6 +1,6 @@
 # User config
 BUILD_DIR = build
-SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/serial/serial.cpp kernel/mem/heap.cpp
+SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/dev/dev.cpp kernel/serial/serial.cpp kernel/mem/heap.cpp
 BOOT_ASM = boot/boot.asm
 
 # Script
