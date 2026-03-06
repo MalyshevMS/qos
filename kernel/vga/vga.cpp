@@ -1,13 +1,14 @@
 #include "vga.hpp"
 
 char Vga::color = 0x1F;
+unsigned short* Vga::video = ((unsigned short*)0xB8000);
 
 void Vga::clear() {
     for (int i = 0; i < width * height; i++) {
-        VGA[i] = color << 8;
+        video[i] = color << 8;
     }
 }
 
 void Vga::putc(int x, int y, char c) {
-    VGA[width * y + x] = (color << 8) | c;
+    video[width * y + x] = (color << 8) | c;
 }

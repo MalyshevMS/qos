@@ -1,7 +1,7 @@
 # User config
 BUILD_DIR = build
-SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/serial/serial.cpp
-BOOT_ASM = kernel/boot/boot.asm
+SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/serial/serial.cpp kernel/mem/heap.cpp
+BOOT_ASM = boot/boot.asm
 
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES))

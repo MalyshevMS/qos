@@ -14,7 +14,7 @@ void kernel_main() {
 
     Serial::write("Hello from serial!\n");
 
-    while(1) {
+    while (1) {
         asm volatile("hlt");
     }
 }

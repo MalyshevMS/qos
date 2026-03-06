@@ -2,7 +2,7 @@
 
 
 namespace Vga {
-    #define VGA ((unsigned short*)0xB8000)
+    extern unsigned short* video;
     constexpr unsigned short width = 80;
     constexpr unsigned short height = 25;
     extern char color;
