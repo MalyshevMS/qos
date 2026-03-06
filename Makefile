@@ -1,43 +1,51 @@
+# User config
 BUILD_DIR = build
-ISO_DIR = $(BUILD_DIR)/iso
+SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/serial/serial.cpp
+BOOT_ASM = kernel/boot/boot.asm
 
-CXX = g++
+# Script
+OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
+
+CC = g++
 LD = ld
+NASM = nasm
+OBJCOPY = objcopy
+QEMU = qemu-system-x86_64
 
-CFLAGS = -ffreestanding -O2 -Wall -Wextra
-LDFLAGS = -T linker.ld
+CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -c
+LDFLAGS = -m elf_i386 -T linker.ld
+ASMFLAGS = -f bin
 
-all: $(BUILD_DIR)/qos.iso
+TARGET = $(BUILD_DIR)/os.img
+BOOT = $(BUILD_DIR)/boot.bin
+KERNEL = $(BUILD_DIR)/kernel.bin
+KERNEL_ELF = $(BUILD_DIR)/kernel.elf
+
+all: $(TARGET)
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	mkdir -p $@
 
-$(BUILD_DIR)/boot.o: kernel/boot.asm | $(BUILD_DIR)
-	nasm -f elf64 $< -o $@
+$(BOOT): $(BOOT_ASM) | $(BUILD_DIR)
+	$(NASM) $(ASMFLAGS) $< -o $@
 
-$(BUILD_DIR)/multiboot.o: kernel/multiboot.asm | $(BUILD_DIR)
-	nasm -f elf64 $< -o $@
+$(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/kernel.o: kernel/kernel.cpp | $(BUILD_DIR)
-	$(CXX) $(CFLAGS) -c $< -o $@
+$(KERNEL_ELF): $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $@ $^
 
-$(BUILD_DIR)/kernel.bin: \
-$(BUILD_DIR)/boot.o \
-$(BUILD_DIR)/multiboot.o \
-$(BUILD_DIR)/kernel.o
-	$(LD) $(LDFLAGS) $^ -o $@
+$(KERNEL): $(KERNEL_ELF)
+	$(OBJCOPY) -O binary $< $@
 
-$(BUILD_DIR)/qos.iso: $(BUILD_DIR)/kernel.bin
-	mkdir -p $(ISO_DIR)/boot/grub
-	cp $(BUILD_DIR)/kernel.bin $(ISO_DIR)/boot/
-	cp grub/grub.cfg $(ISO_DIR)/boot/grub/
-	grub-mkrescue -o $@ $(ISO_DIR)
+$(TARGET): $(BOOT) $(KERNEL)
+	cat $(BOOT) $(KERNEL) > $@
 
-run: all
-	qemu-system-x86_64 \
-	-cdrom $(BUILD_DIR)/qos.iso \
-	-m 1G \
-	-serial stdio
+run: $(TARGET)
+	$(QEMU) -drive format=raw,file=$(TARGET) -serial stdio
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+.PHONY: all run clean

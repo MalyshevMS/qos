@@ -1,25 +1,20 @@
-#include <stdint.h>
+#include "vga/vga.hpp"
+#include "serial/serial.hpp"
+#include "config.txx"
 
-#define VGA ((volatile uint16_t*)0xB8000)
-#define VGA_WIDTH 80
-#define VGA_HEIGHT 25
+KERNEL_ENTRY
+void kernel_main() {
+    Vga::clear();
+    Serial::init();
 
-void cls() {
-    for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
-        VGA[i] = 0x001f;
+    auto text = "Hello from VGA!";
+    for (int i = 0; text[i] != 0; i++) {
+        Vga::putc(i, 0, text[i]);
     }
 
-    VGA[3] = 0x1f41;
-}
+    Serial::write("Hello from serial!\n");
 
-extern "C" void kernel_main() {
-    cls();
-    
-    VGA[0] = 0x1f41;
-    VGA[1] = 0x1f41;
-    // VGA[2] = 0x1f41;
-    
-    while (1) {
-        asm volatile ("hlt");
+    while(1) {
+        asm volatile("hlt");
     }
 }
