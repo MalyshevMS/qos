@@ -22,6 +22,7 @@ void Mem::init() {
 }
 
 void *Mem::malloc(size_t size) {
+    size = (size + 7) & ~7;
     auto current = heap_head;
 
     while (current) {
