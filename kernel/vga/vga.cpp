@@ -1,4 +1,6 @@
-#include "vga.hpp"
+#include <kernel/vga.hpp>
+
+using namespace Kernel;
 
 char Vga::color = 0x1F;
 unsigned short* Vga::video = ((unsigned short*)0xB8000);

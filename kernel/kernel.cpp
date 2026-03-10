@@ -1,30 +1,23 @@
-#include "vga/vga.hpp"
-#include "serial/serial.hpp"
-#include "mem/heap.hpp"
-#include "mem/new.txx"
-#include "str/strlen.hpp"
-#include "config.txx"
+#include <cfg/entry.txx>
+#include <kernel/serial.hpp>
+#include <kernel/memory.hpp>
+#include <kernel/vga.hpp>
 
+using namespace Kernel;
 using namespace Mem;
 
 KERNEL_ENTRY
 void kernel_main() {
-    Vga::clear();
+    meminit();
     Serial::init();
+    Vga::clear();
 
-    auto text = new char[] { "Klyde 41.71" };
-    auto len = strlen(text);
-    for (int y = 0; y < Vga::height; y++) {
-        for (int i = 0; i < len; i++) {
-            for (int j = 0; j < Vga::width / len; j++) {
-                Vga::putc(i + j * len + j, y, text[i]);
-            }
-        }
+    auto text = new char[] { "Hello, VGA!" };
+    for (int i = 0; text[i] != 0; i++) {
+        Vga::putc(i, 0, text[i]);
     }
 
-    delete[] text;
-
-    Serial::write("Klyde 41.71\n");
+    Serial::write("Hello, serial!\n");
 
     while (1) {
         asm volatile("hlt");

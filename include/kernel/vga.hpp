@@ -1,6 +1,6 @@
 #pragma once
 
-
+namespace Kernel {
 namespace Vga {
     extern unsigned short* video;
     constexpr unsigned short width = 80;
@@ -10,4 +10,5 @@ namespace Vga {
     void clear();
     
     void putc(int x, int y, char c);
-}
+} // namespace Vga
+} // namespace Kernel

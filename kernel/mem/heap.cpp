@@ -1,5 +1,7 @@
-#include "heap.hpp"
+#include <kernel/memory.hpp>
 #include <stdint.h>
+
+using namespace Kernel;
 
 #define HEAP_START (0x200000)
 #define HEAP_SIZE  (0x100000)
@@ -13,7 +15,7 @@ struct BlockHeader {
 
 static BlockHeader* heap_head = nullptr;
 
-void Mem::init() {
+void Mem::meminit() {
     heap_head = (BlockHeader*)HEAP_START;
 
     heap_head->size = HEAP_SIZE - sizeof(BlockHeader);

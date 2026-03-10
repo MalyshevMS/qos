@@ -1,18 +1,25 @@
 # User config
 BUILD_DIR = build
-SOURCES = kernel/kernel.cpp kernel/vga/vga.cpp kernel/dev/dev.cpp kernel/serial/serial.cpp kernel/mem/heap.cpp kernel/str/strlen.cpp
-BOOT_ASM = boot/boot.asm
+SOURCES = \
+kernel/kernel.cpp \
+kernel/vga/vga.cpp \
+kernel/dev/ports.cpp \
+kernel/serial/serial.cpp \
+kernel/mem/heap.cpp \
+kernel/mem/new.cpp
+
+BOOT_ASM = arch/x86/boot.asm
 
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
 
-CC = g++
+CXX = g++
 LD = ld
 NASM = nasm
 OBJCOPY = objcopy
 QEMU = qemu-system-x86_64
 
-CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -c
+CXXFLAGS = -Iinclude -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -c
 LDFLAGS = -m elf_i386 -T linker.ld
 ASMFLAGS = -f bin
 
@@ -31,7 +38,7 @@ $(BOOT): $(BOOT_ASM) | $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $< -o $@
 
 $(KERNEL_ELF): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^
