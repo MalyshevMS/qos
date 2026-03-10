@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace Kernel {
 namespace Serial {
@@ -13,5 +14,7 @@ namespace Serial {
     void write_char(char c);
     
     void write(const char* str);
+
+    void write_hex(size_t hex);
 } // namespace Serial
 } // namespace Kernel

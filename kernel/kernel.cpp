@@ -16,6 +16,7 @@ void kernel_main() {
     for (int i = 0; text[i] != 0; i++) {
         Vga::putc(i, 0, text[i]);
     }
+    delete[] text;
 
     Serial::write("Hello, serial!\n");
 

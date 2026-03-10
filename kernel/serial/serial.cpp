@@ -27,3 +27,19 @@ void Serial::write(const char* str) {
         write_char(str[i]);
     }
 }
+
+void Serial::write_hex(size_t hex) {
+    char buffer[11];
+    constexpr char* hex_chars = "0123456789ABCDEF";
+
+    buffer[0] = '0';
+    buffer[1] = 'x';
+    buffer[10] = 0;
+
+    for (int i = 9; i >= 2; i--) {
+        buffer[i] = hex_chars[hex & 0xF];
+        hex >>= 4;
+    }
+
+    write(buffer);
+}

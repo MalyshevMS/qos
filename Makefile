@@ -3,15 +3,22 @@ BUILD_DIR = build
 SOURCES = \
 kernel/kernel.cpp \
 kernel/vga/vga.cpp \
-kernel/dev/ports.cpp \
+kernel/io/ports.cpp \
 kernel/serial/serial.cpp \
 kernel/mem/heap.cpp \
-kernel/mem/new.cpp
+kernel/mem/new.cpp \
+arch/x86/idt.cpp \
+arch/x86/pic.cpp \
+arch/x86/irq.cpp 
+
+ASM_SOURCES = \
+arch/x86/idt_load.asm \
+arch/x86/irq.asm
 
 BOOT_ASM = arch/x86/boot.asm
 
 # Script
-OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
+OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
 
 CXX = g++
 LD = ld
@@ -39,6 +46,10 @@ $(BOOT): $(BOOT_ASM) | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $< -o $@
+
+$(BUILD_DIR)/%.o: %.asm | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
+	$(NASM) -f elf32 $< -o $@
 
 $(KERNEL_ELF): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^
