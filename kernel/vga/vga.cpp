@@ -14,3 +14,9 @@ void Vga::clear() {
 void Vga::putc(int x, int y, char c) {
     video[width * y + x] = (color << 8) | c;
 }
+
+void Vga::print0(const char *str) {
+    for (int i = 0; str[i] != 0; i++) {
+        Vga::putc(i, 0, str[i]);
+    }
+}

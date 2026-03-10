@@ -25,7 +25,7 @@ void kernel_main() {
 
     asm volatile("sti");
 
-    Serial::write("Kernel ready.\n");
+    Vga::print0("Kernel ready.");
 
     while (1) {
         asm volatile("hlt");
