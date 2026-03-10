@@ -21,10 +21,11 @@ void kernel_main() {
     x86::idt_init();
 
     x86::idt_set_gate(33, (uint32_t)irq1_stub);
+    x86::pic_unmask_irq(1);
 
     asm volatile("sti");
 
-    Serial::write("Kernel ready\n");
+    Serial::write("Kernel ready.\n");
 
     while (1) {
         asm volatile("hlt");
