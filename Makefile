@@ -13,7 +13,7 @@ arch/x86/irq.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
-arch/x86/irq.asm
+arch/x86/irq_stub.asm
 
 BOOT_ASM = arch/x86/boot.asm
 
@@ -26,7 +26,7 @@ NASM = nasm
 OBJCOPY = objcopy
 QEMU = qemu-system-x86_64
 
-CXXFLAGS = -Iinclude -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -c
+CXXFLAGS = -Iinclude -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -c
 LDFLAGS = -m elf_i386 -T linker.ld
 ASMFLAGS = -f bin
 

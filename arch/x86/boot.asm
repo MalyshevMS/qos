@@ -31,11 +31,7 @@ kernel32:
     mov ss, ax
     mov esp, 0x90000
     
-    call 0x10000 ; Real kernel address
-    
-hang_loop:
-    hlt
-    jmp hang_loop
+    jmp 0x10000 ; Real kernel address
 
 gdt_start:
     dq 0

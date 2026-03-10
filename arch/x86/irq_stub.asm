@@ -1,3 +1,4 @@
+[bits 32]
 global irq1_stub
 extern irq1_handler
 

@@ -30,7 +30,7 @@ void Serial::write(const char* str) {
 
 void Serial::write_hex(size_t hex) {
     char buffer[11];
-    constexpr char* hex_chars = "0123456789ABCDEF";
+    const char* hex_chars = "0123456789ABCDEF";
 
     buffer[0] = '0';
     buffer[1] = 'x';
