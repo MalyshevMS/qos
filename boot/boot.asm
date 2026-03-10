@@ -47,5 +47,6 @@ gdt_ptr:
     dw gdt_end - gdt_start - 1
     dd gdt_start
 
-times 510-($-$$) db 0
+times 508-($-$$) db 0
+dw 0x7141
 dw 0xAA55
