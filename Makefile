@@ -9,11 +9,11 @@ kernel/mem/heap.cpp \
 kernel/mem/new.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
-arch/x86/irq.cpp 
+driver/keyboard.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
-arch/x86/irq_stub.asm
+arch/x86/irq_handler.asm
 
 BOOT_ASM = arch/x86/boot.asm
 
