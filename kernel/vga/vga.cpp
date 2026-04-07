@@ -1,4 +1,5 @@
 #include <kernel/vga.hpp>
+#include <kernel/ports.hpp>
 
 using namespace Kernel;
 
@@ -15,8 +16,21 @@ void Vga::putc(int x, int y, char c) {
     video[width * y + x] = (color << 8) | c;
 }
 
-void Vga::print0(const char *str) {
+char Vga::getc(int x, int y) {
+    return video[width * y + x] & 0xFF;
+}
+
+void Vga::printxy(const char *str, int x, int y) {
     for (int i = 0; str[i] != 0; i++) {
-        Vga::putc(i, 0, str[i]);
+        Vga::putc(i + x, y, str[i]);
     }
+}
+void Kernel::Vga::update_cursor(int x, int y) {
+    uint16_t pos = y * width + x;
+
+    Ports::outb(0x3D4, 0x0F);
+    Ports::outb(0x3D5, (uint8_t)pos & 0xFF);
+
+    Ports::outb(0x3D4, 0x0E);
+    Ports::outb(0x3D5, (uint8_t)(pos >> 8) & 0xFF);
 }

@@ -115,5 +115,7 @@ namespace Keyboard {
     // Clear key buffer
     void flush();
 
+    char scantochar(uint8_t scancode);
+
 } // namespace Keyboard
 } // namespace Kernel

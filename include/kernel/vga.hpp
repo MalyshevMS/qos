@@ -10,6 +10,8 @@ namespace Vga {
     void clear();
     
     void putc(int x, int y, char c);
-    void print0(const char* str);
+    char getc(int x, int y);
+    void printxy(const char* str, int x, int y);
+    void update_cursor(int x, int y);
 } // namespace Vga
 } // namespace Kernel

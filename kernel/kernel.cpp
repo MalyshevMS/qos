@@ -28,14 +28,54 @@ void kernel_main() {
 
     INT_ENABLE;
 
-    Vga::print0("Keyboard driver initialized. Press keys...");
+    Serial::write("Keyboard driver initialized. Press keys...\n");
+
+    int x = 0, y = 0;
+
+    Vga::update_cursor(x, y);
 
     while (1) {
         if (Keyboard::has_data()) {
-            uint8_t sc = Keyboard::getscan();
-            Serial::write("scancode: ");
-            Serial::write_hex(sc);
-            Serial::write("\n");
+            auto sc = Keyboard::getscan();
+            auto ch = Keyboard::scantochar(sc);
+
+            if (ch != 0 && (ch != '\n' && ch != '\b')) {
+                Vga::putc(x, y, ch);
+                x++;
+                if (x > Vga::width) {
+                    x = 1;
+                    y++;
+                }
+            }
+
+            if (sc == Keyboard::SCANCODE_BACKSPACE) {
+                Vga::putc(--x, y, 0);
+                if (x < 0) {
+                    x = Vga::width;
+                    y--;
+
+                    while (Vga::getc(x, y) == 0) x--;
+                    x++;
+                }
+
+                if (y < 0) {
+                    x = 0;
+                    y = 0;
+                }
+            } else if (sc == Keyboard::SCANCODE_ENTER) {
+                x = 0;
+                y++;
+            } else if (sc == Keyboard::SCANCODE_UP) {
+                y--;
+            } else if (sc == Keyboard::SCANCODE_DOWN) {
+                y++;
+            } else if (sc == Keyboard::SCANCODE_RIGHT) {
+                x++;
+            } else if (sc == Keyboard::SCANCODE_LEFT) {
+                x--;
+            }
+
+            Vga::update_cursor(x, y);
         }
         
         CPU_HALT;

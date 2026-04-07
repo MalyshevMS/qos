@@ -129,7 +129,7 @@ static const char scancode_to_char_shift[] = {
     '"',    // 0x28 - Shift+'
     '~',    // 0x29 - Shift+`
     0,      // 0x2A - LSHIFT
-    '|',    // 0x2B - Shift+\
+    '|',    // 0x2B - Shift+Backslash
     'Z',    // 0x2C
     'X',    // 0x2D
     'C',    // 0x2E
@@ -206,14 +206,7 @@ uint8_t getscan() {
     return code;
 }
 
-char getchar() {
-    if (last_scancode == 0) {
-        return 0;
-    }
-    
-    uint8_t scancode = last_scancode;
-    last_scancode = 0;
-    
+char scantochar(uint8_t scancode) {
     // Check bounds
     if (scancode >= sizeof(scancode_to_char)) {
         return 0;
@@ -250,6 +243,17 @@ char getchar() {
     }
     
     return ch;
+}
+
+char getchar() {
+    if (last_scancode == 0) {
+        return 0;
+    }
+    
+    uint8_t scancode = last_scancode;
+    last_scancode = 0;
+    
+    return scantochar(scancode);
 }
 
 bool has_data() {
