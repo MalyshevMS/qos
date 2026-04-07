@@ -2,6 +2,14 @@
 [org 0x7c00]
 
 start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7c00
+    sti
+
     mov ax, 0x1000
     mov es, ax
     mov bx, 0x0000
@@ -11,7 +19,7 @@ start:
     mov ch, 0
     mov cl, 2
     mov dh, 0
-    mov dl, 0x80
+    
     int 0x13
     
     cli
@@ -43,6 +51,5 @@ gdt_ptr:
     dw gdt_end - gdt_start - 1
     dd gdt_start
 
-times 508-($-$$) db 0
-dw 0x7141
+times 510-($-$$) db 0
 dw 0xAA55
