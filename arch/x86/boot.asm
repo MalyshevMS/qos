@@ -1,3 +1,5 @@
+; THIS IS OLD BOOTLOADER. NOW PLEASE USE GRUB
+
 [bits 16]
 [org 0x7c00]
 

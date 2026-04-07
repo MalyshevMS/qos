@@ -5,6 +5,7 @@
 #include <kernel/vga.hpp>
 #include <driver/keyboard.hpp>
 
+#include <arch/x86/gdt.hpp>
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
 #include <arch/x86/irq.hpp>
@@ -15,6 +16,9 @@ using namespace Arch;
 
 KERNEL_ENTRY
 void kernel_main() {
+    // Initialize GDT first (critical for memory management)
+    x86::gdt_init();
+    
     meminit();
     Serial::init();
     Keyboard::init();
@@ -29,8 +33,9 @@ void kernel_main() {
     INT_ENABLE;
 
     Serial::write("Keyboard driver initialized. Press keys...\n");
+    Vga::printxy("Welcome to my OS (VGA text editor)", 0, 0);
 
-    int x = 0, y = 0;
+    int x = 34, y = 0;
 
     Vga::update_cursor(x, y);
 

@@ -9,13 +9,14 @@ kernel/mem/heap.cpp \
 kernel/mem/new.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
+arch/x86/gdt.cpp \
 driver/keyboard.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
-arch/x86/irq_handler.asm
-
-BOOT_ASM = arch/x86/boot.asm
+arch/x86/gdt_load.asm \
+arch/x86/irq_handler.asm \
+arch/x86/multiboot_header.asm
 
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
@@ -24,24 +25,20 @@ CXX = g++
 LD = ld
 NASM = nasm
 OBJCOPY = objcopy
+GRUB_MKRESCUE = grub-mkrescue
 QEMU = qemu-system-x86_64
 
 CXXFLAGS = -Iinclude -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -c
 LDFLAGS = -m elf_i386 -T linker.ld
 ASMFLAGS = -f bin
 
-TARGET = $(BUILD_DIR)/os.img
-BOOT = $(BUILD_DIR)/boot.bin
-KERNEL = $(BUILD_DIR)/kernel.bin
-KERNEL_ELF = $(BUILD_DIR)/kernel.elf
+TARGET_ELF = $(BUILD_DIR)/kernel.elf
+TARGET_ISO = $(BUILD_DIR)/os.iso
 
-all: $(TARGET)
+all: $(TARGET_ISO)
 
 $(BUILD_DIR):
 	mkdir -p $@
-
-$(BOOT): $(BOOT_ASM) | $(BUILD_DIR)
-	$(NASM) $(ASMFLAGS) $< -o $@
 
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
@@ -51,17 +48,17 @@ $(BUILD_DIR)/%.o: %.asm | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	$(NASM) -f elf32 $< -o $@
 
-$(KERNEL_ELF): $(OBJECTS)
+$(TARGET_ELF): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-$(KERNEL): $(KERNEL_ELF)
-	$(OBJCOPY) -O binary $< $@
+$(TARGET_ISO): $(TARGET_ELF)
+	@mkdir -p $(BUILD_DIR)/isodir/boot/grub
+	@cp $(TARGET_ELF) $(BUILD_DIR)/isodir/boot/kernel.elf
+	@cp grub.cfg $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	$(GRUB_MKRESCUE) -o $@ $(BUILD_DIR)/isodir
 
-$(TARGET): $(BOOT) $(KERNEL)
-	cat $(BOOT) $(KERNEL) > $@
-
-run: $(TARGET)
-	$(QEMU) -drive format=raw,file=$(TARGET) -serial stdio
+run: $(TARGET_ISO)
+	$(QEMU) -cdrom $(TARGET_ISO) -serial stdio
 
 clean:
 	rm -rf $(BUILD_DIR)

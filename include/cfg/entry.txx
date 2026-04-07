@@ -1,3 +1,4 @@
 #pragma once
 
-#define KERNEL_ENTRY extern "C" __attribute__((section(".kernel_main")))
+// Kernel entry point macro for proper C++ name mangling
+#define KERNEL_ENTRY extern "C"
