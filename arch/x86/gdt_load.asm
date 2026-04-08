@@ -7,8 +7,8 @@ section .text
 global gdt_load
 
 gdt_load:
-    mov eax, [esp + 4]  ; Get pointer to GDT descriptor
-    lgdt [eax]          ; Load GDT
+    mov eax, [esp + 4]
+    lgdt [eax]
     
     ; Far jump to reload CS
     jmp KERNEL_CODE_SEG:.reload_cs

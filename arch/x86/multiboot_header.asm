@@ -1,4 +1,3 @@
-; multiboot_header.asm
 section .multiboot
 align 4
     dd 0x1BADB002                          ; Magic number

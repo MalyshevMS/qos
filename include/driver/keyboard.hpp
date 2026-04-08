@@ -100,20 +100,14 @@ namespace Keyboard {
     constexpr int SCANCODE_PGUP = 0x49;
     constexpr int SCANCODE_PGDN = 0x51;
 
-    // Initialize keyboard drivercode
     void init();
 
-    // Get last pressed key scancode
     uint8_t getscan();
 
-    // Get character from keyboard (for printable ASCII characters)
-    // Returns the character if it's a printable key, 0 if no key or non-printable key
     char getchar();
 
-    // Check if key buffer has data
     bool has_data();
 
-    // Clear key buffer
     void flush();
 
     char scantochar(uint8_t scancode);

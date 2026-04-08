@@ -188,7 +188,6 @@ void keyboard_callback(const Arch::x86::Registers* regs) {
         }
     }
     
-    // Send End of Interrupt (EOI) to PIC
     Ports::outb(0x20, 0x20);
 }
 
@@ -237,14 +236,10 @@ char scantochar(uint8_t scancode) {
     
     char ch = table[scancode];
     
-    // Return 0 for non-printable characters
-    if (ch == 0) {
-        return 0;
-    }
-    
     return ch;
 }
 
+// Please, try to avoid using this function. Instead use scantochar + getscan
 char getchar() {
     if (last_scancode == 0) {
         return 0;

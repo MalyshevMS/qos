@@ -8,7 +8,6 @@
 #include <arch/x86/gdt.hpp>
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
-#include <arch/x86/irq.hpp>
 
 using namespace Kernel;
 using namespace Mem;
