@@ -9,9 +9,12 @@
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
 
+#include <klib/string.hpp>
+
 using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
+using namespace kstd;
 
 KERNEL_ENTRY
 void kernel_main() {
@@ -31,10 +34,13 @@ void kernel_main() {
 
     INT_ENABLE;
 
-    Serial::write("Keyboard driver initialized. Press keys...\n");
-    Vga::printxy("Welcome to my OS (VGA text editor)", 0, 0);
+    string hello_message = "Welcome to my OS (VGA text editor)";
 
-    int x = 34, y = 0;
+    Serial::write("Keyboard driver initialized. Press keys...\n");
+    Vga::printxy(hello_message.c_str(), 0, 0);
+
+    int x = hello_message.size();
+    int y = 0;
 
     Vga::update_cursor(x, y);
 

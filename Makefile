@@ -10,7 +10,10 @@ kernel/mem/new.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
-driver/keyboard.cpp
+driver/keyboard.cpp \
+klib/mem.cpp \
+klib/cstring.cpp \
+klib/string.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
