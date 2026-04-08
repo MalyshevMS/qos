@@ -27,7 +27,7 @@ void kernel_main() {
     x86::pic_remap();
     x86::idt_init();
 
-    x86::idt_set_gate(33, (uint32_t)irq1_handler);
+    x86::irq_register_handler(1, (x86::irq_handler_t)&Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);
 
     INT_ENABLE;

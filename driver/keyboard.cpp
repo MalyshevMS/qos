@@ -159,7 +159,7 @@ static const char scancode_to_char_shift[] = {
     0,      // 0x46 - SCROLLLOCK
 };
 
-extern "C" void keyboard_interrupt_handler() {
+void keyboard_callback(const Arch::x86::Registers* regs) {
     uint8_t scancode = Ports::inb(0x60);
     
     if (scancode & 0x80) {

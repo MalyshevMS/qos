@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <arch/x86/idt.hpp>
 
 namespace Kernel {
 namespace Keyboard {
@@ -116,6 +117,8 @@ namespace Keyboard {
     void flush();
 
     char scantochar(uint8_t scancode);
+
+    void keyboard_callback(const Arch::x86::Registers* regs);
 
 } // namespace Keyboard
 } // namespace Kernel
