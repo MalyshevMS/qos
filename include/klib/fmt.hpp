@@ -44,7 +44,7 @@ inline string ptr_to_string(const void* p) {
 // ============================================================================
 string format(const string& fmt, ...) {
     string out;
-    out.reserve(fmt.size() * 2); // Heuristic reservation
+    // out.reserve(fmt.size() * 2); // Heuristic reservation // TODO: Uncomment when there is capacity in string class
     va_list args;
     va_start(args, fmt);
 

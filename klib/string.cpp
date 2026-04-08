@@ -10,9 +10,15 @@ string::string(const char* cstr) {
     memcpy(head, cstr, len);
 }
 
-char string::operator[](size_t index) const {
-    if (index > len) return 0;
-    return *(head + index);
+string::string(const char *data, size_t size) {
+    len = size;
+    head = new char[len];
+    memcpy(head, data, len);
+}
+
+char& string::operator[](size_t index) const {
+    if (index > len) [[unlikely]] return *head;
+    return head[index];
 }
 
 const char* string::c_str() const {
@@ -20,4 +26,98 @@ const char* string::c_str() const {
     memcpy(res, head, len);
     res[len] = 0; // Null terminator
     return res;
+}
+
+size_t string::find(char seek, size_t from) const {
+    for (int i = from; i < len; i++) if (head[i] == seek) return i;
+    return npos;
+}
+
+string string::substr(size_t from, size_t size) const {
+    return string(head + from, size);
+}
+
+string kstd::operator+(const string &left, const string &right) {
+    string res;
+    res.len = left.len + right.len;
+    res.head = new char[res.len];
+
+    memcpy(res.head, left.head, left.len); // Copy first string
+
+    for (int i = 0; i < right.len; i++) { // Copy second string
+        res.head[i + left.len] = right[i];
+    }
+
+    return res;
+}
+
+string kstd::operator+(const string &left, const char *right) {
+    string res;
+    auto rlen = strlen(right);
+    res.len = left.len + rlen;
+    res.head = new char[res.len];
+
+    memcpy(res.head, left.head, left.len);
+
+    for (int i = 0; i < rlen; i++) {
+        res.head[i + left.len] = right[i];
+    }
+
+    return res;
+}
+
+string kstd::operator+(const char *left, const string &right) {
+    string res;
+    auto llen = strlen(left);
+    res.len = llen + right.len;
+    res.head = new char[res.len];
+
+    memcpy(res.head, left, llen);
+
+    for (int i = 0; i < right.len; i++) {
+        res.head[i + llen] = right[i];
+    }
+
+    return res;
+}
+
+string kstd::operator+(const string &left, char right) {
+    string res;
+    res.len = left.len + 1;
+    res.head = new char[res.len];
+    memcpy(res.head, left.head, left.len);
+    res.head[left.len] = right;
+
+    return res;
+}
+
+string kstd::operator+(char left, const string &right) {
+    string res;
+    res.len = right.len + 1;
+    res.head = new char[res.len];
+    res.head[0] = left;
+
+    for (int i = 0; i < right.len; i++) res.head[i + 1] = right[i];
+
+    return res;
+}
+
+string& string::operator+=(const string &str) {
+    *this + str;
+    return *this;
+}
+
+string& string::operator+=(const char *str) {
+    *this + str;
+    return *this;
+}
+
+string& string::operator+=(char ch) {
+    *this + ch;
+    return *this;
+}
+
+bool kstd::operator==(const string &left, const string &right) {
+    for (int i = 0; i < left.len; i++) if (left[i] != right[i]) return false;
+    return true;
 }

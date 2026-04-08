@@ -35,7 +35,9 @@ void kernel_main() {
 
     INT_ENABLE;
 
-    string hello_message = "Welcome to my OS (VGA text editor)";
+    string text1 = "Welcome to my OS";
+    string text2 = "(VGA text editor)";
+    string hello_message = fmt::format("Hello, world {i}", 4171);
 
     Serial::write("Keyboard driver initialized. Press keys...\n");
     Vga::printxy(hello_message.c_str(), 0, 0);
