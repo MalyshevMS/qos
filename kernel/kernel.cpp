@@ -11,6 +11,8 @@
 
 #include <klib/string.hpp>
 
+#include <klib/fmt.hpp>
+
 using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
@@ -18,7 +20,6 @@ using namespace kstd;
 
 KERNEL_ENTRY
 void kernel_main() {
-    // Initialize GDT first (critical for memory management)
     x86::gdt_init();
     
     meminit();

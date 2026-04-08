@@ -8,12 +8,36 @@ private:
     char* head;
     size_t len;
 public:
-    string(const char* cstr);
+    static const size_t npos = -1;
+
+    string(const char* cstr = "");
+    string(const char* data, size_t size);
     
-    char operator[](int index);
+    char operator[](size_t index) const;
+    
+    friend string operator+(const string& left, const string& right);
+    friend string operator+(const char* left, const string& right);
+    friend string operator+(const string& left, const char* right);
+    friend string operator+(char left, string right);
+    friend string operator+(string left, char right);
 
-    const char* c_str();
+    friend string operator+=(const string& left, const string& right);
+    friend string operator+=(const char* left, const string& right);
+    friend string operator+=(const string& left, const char* right);
+    friend string operator+=(char left, string right);
+    friend string operator+=(string left, char right);
 
-    size_t size() { return len; }
+    size_t find(char seek, size_t from = 0) const;
+
+    string substr(size_t from, size_t size = npos) const;
+
+    const char* c_str() const;
+    const char* data() const;
+
+    friend bool operator==(const string& left, const string& right);
+
+    size_t size() const { return len; }
+
+    void reserve(size_t size);
 };
 } // namespace std

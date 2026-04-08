@@ -31,7 +31,7 @@ OBJCOPY = objcopy
 GRUB_MKRESCUE = grub-mkrescue
 QEMU = qemu-system-x86_64
 
-CXXFLAGS = -Iinclude -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -c
+CXXFLAGS = -Iinclude -std=c++20 -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -c
 LDFLAGS = -m elf_i386 -T linker.ld
 ASMFLAGS = -f bin
 
