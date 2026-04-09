@@ -37,9 +37,11 @@ void kernel_main() {
 
     string text1 = "Welcome to my OS";
     string text2 = "(VGA text editor)";
-    string hello_message = fmt::format("Hello, world {i}", 4171);
+    string hello_message = text1 + " " + text2; // Check strings concatenation
+    string test_fmt = fmt("Hello, {}!", 4171); // Check formating
 
-    Serial::write("Keyboard driver initialized. Press keys...\n");
+    test_fmt += '\n'; // Check concatenation with chars
+    Serial::write(test_fmt.c_str()); // Must be "Hello, 4171!"
     Vga::printxy(hello_message.c_str(), 0, 0);
 
     int x = hello_message.size();

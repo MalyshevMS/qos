@@ -2,42 +2,47 @@
 #include <klib/cstring.hpp>
 #include <klib/mem.hpp>
 
-using namespace kstd;
+kstd::string::string() : head(nullptr), len(0) {}
 
-string::string(const char* cstr) {
+kstd::string::string(const char* cstr) {
+    if (!cstr) {
+        head = nullptr;
+        len = 0;
+        return;
+    }
     len = strlen(cstr);
     head = new char[len];
     memcpy(head, cstr, len);
 }
 
-string::string(const char *data, size_t size) {
+kstd::string::string(const char *data, size_t size) {
     len = size;
     head = new char[len];
     memcpy(head, data, len);
 }
 
-char& string::operator[](size_t index) const {
+char& kstd::string::operator[](size_t index) const {
     if (index > len) [[unlikely]] return *head;
     return head[index];
 }
 
-const char* string::c_str() const {
+const char* kstd::string::c_str() const {
     auto res = new char[len + 1];
     memcpy(res, head, len);
     res[len] = 0; // Null terminator
     return res;
 }
 
-size_t string::find(char seek, size_t from) const {
+size_t kstd::string::find(char seek, size_t from) const {
     for (int i = from; i < len; i++) if (head[i] == seek) return i;
     return npos;
 }
 
-string string::substr(size_t from, size_t size) const {
+kstd::string kstd::string::substr(size_t from, size_t size) const {
     return string(head + from, size);
 }
 
-string kstd::operator+(const string &left, const string &right) {
+kstd::string kstd::operator+(const string &left, const string &right) {
     string res;
     res.len = left.len + right.len;
     res.head = new char[res.len];
@@ -51,7 +56,7 @@ string kstd::operator+(const string &left, const string &right) {
     return res;
 }
 
-string kstd::operator+(const string &left, const char *right) {
+kstd::string kstd::operator+(const string &left, const char *right) {
     string res;
     auto rlen = strlen(right);
     res.len = left.len + rlen;
@@ -66,7 +71,7 @@ string kstd::operator+(const string &left, const char *right) {
     return res;
 }
 
-string kstd::operator+(const char *left, const string &right) {
+kstd::string kstd::operator+(const char *left, const string &right) {
     string res;
     auto llen = strlen(left);
     res.len = llen + right.len;
@@ -81,7 +86,7 @@ string kstd::operator+(const char *left, const string &right) {
     return res;
 }
 
-string kstd::operator+(const string &left, char right) {
+kstd::string kstd::operator+(const string &left, char right) {
     string res;
     res.len = left.len + 1;
     res.head = new char[res.len];
@@ -91,7 +96,7 @@ string kstd::operator+(const string &left, char right) {
     return res;
 }
 
-string kstd::operator+(char left, const string &right) {
+kstd::string kstd::operator+(char left, const string &right) {
     string res;
     res.len = right.len + 1;
     res.head = new char[res.len];
@@ -102,18 +107,18 @@ string kstd::operator+(char left, const string &right) {
     return res;
 }
 
-string& string::operator+=(const string &str) {
-    *this + str;
+kstd::string& kstd::string::operator+=(const string &str) {
+    *this = *this + str;
     return *this;
 }
 
-string& string::operator+=(const char *str) {
-    *this + str;
+kstd::string& kstd::string::operator+=(const char *str) {
+    *this = *this + str;
     return *this;
 }
 
-string& string::operator+=(char ch) {
-    *this + ch;
+kstd::string& kstd::string::operator+=(char ch) {
+    *this = *this + ch;
     return *this;
 }
 

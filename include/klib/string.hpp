@@ -10,7 +10,8 @@ private:
 public:
     static const size_t npos = -1;
 
-    string(const char* cstr = "");
+    string();
+    string(const char* cstr);
     string(const char* data, size_t size);
     
     char& operator[](size_t index) const;
@@ -38,4 +39,11 @@ public:
 
     // void reserve(size_t size); // TODO: implement a capacity
 };
+
+string operator+(const string& left, const string& right);
+string operator+(const string& left, const char* right);
+string operator+(const char* left, const string& right);
+string operator+(const string& left, char right);
+string operator+(char left, const string& right);
+bool operator==(const string& left, const string& right);
 } // namespace std

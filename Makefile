@@ -44,24 +44,29 @@ $(BUILD_DIR):
 	mkdir -p $@
 
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
+	@printf " CXX\t$<\n"
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $< -o $@
+	@$(CXX) $(CXXFLAGS) $< -o $@
 
 $(BUILD_DIR)/%.o: %.asm | $(BUILD_DIR)
+	@printf " NASM\t$<\n"
 	@mkdir -p $(dir $@)
-	$(NASM) -f elf32 $< -o $@
+	@$(NASM) -f elf32 $< -o $@
 
 $(TARGET_ELF): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^
+	@printf " LD\t$@\n"
+	@$(LD) $(LDFLAGS) -o $@ $^
 
 $(TARGET_ISO): $(TARGET_ELF)
+	@printf " GRUB\t$@\n"
 	@mkdir -p $(BUILD_DIR)/isodir/boot/grub
 	@cp $(TARGET_ELF) $(BUILD_DIR)/isodir/boot/kernel.elf
 	@cp grub.cfg $(BUILD_DIR)/isodir/boot/grub/grub.cfg
-	$(GRUB_MKRESCUE) -o $@ $(BUILD_DIR)/isodir
+	@$(GRUB_MKRESCUE) -o $@ $(BUILD_DIR)/isodir > /dev/null 2>&1
 
 run: $(TARGET_ISO)
-	$(QEMU) -cdrom $(TARGET_ISO) -serial stdio
+	@printf " QEMU\t$(TARGET_ISO)\n"
+	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio
 
 clean:
 	rm -rf $(BUILD_DIR)
