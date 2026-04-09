@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace kstd {
     size_t strlen(const char* str);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace kstd {
     void memcpy(void* dest, const void* source, size_t n);

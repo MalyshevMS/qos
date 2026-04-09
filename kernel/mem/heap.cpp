@@ -1,5 +1,5 @@
 #include <kernel/memory.hpp>
-#include <stdint.h>
+#include <cstdint>
 
 using namespace Kernel;
 
