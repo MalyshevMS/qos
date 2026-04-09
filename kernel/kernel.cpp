@@ -34,15 +34,12 @@ void kernel_main() {
     x86::pic_unmask_irq(1);
 
     INT_ENABLE;
-
-    string text1 = "Welcome to my OS";
-    string text2 = "(VGA text editor)";
-    string hello_message = text1 + " " + text2; // Check strings concatenation
-    string test_fmt = fmt("Hello, {}!", 4171); // Check formating
-
-    test_fmt += '\n'; // Check concatenation with chars
-    Serial::write(test_fmt.c_str()); // Must be "Hello, 4171!"
+    
+    string text1 = "Welcome to my OS!";
+    string text2 = "(Simple VGA text editor with human brain-powered saving)";
+    string hello_message = fmt("{} {}", text1, text2);
     Vga::printxy(hello_message.c_str(), 0, 0);
+    Serial::println("Hello, {}! Test number: {}", "World", 4171);
 
     int x = hello_message.size();
     int y = 0;

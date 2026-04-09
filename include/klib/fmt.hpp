@@ -1,7 +1,11 @@
 #pragma once
 
-#include <cstddef>
 #include <klib/cstring.hpp>
+#include <klib/string.hpp>
+
+#define FMT_TEMPLATE template<typename... Args>
+#define FMT_ARGS const char* format, Args... args
+#define FMT(fsig) FMT_TEMPLATE fsig(FMT_ARGS)
 
 namespace kstd {
 inline void format_helper(string& res, const char* fmt) {
@@ -16,6 +20,10 @@ inline void append_arg(string& res, int val) {
     char buf[12]; 
     itoa(val, buf, 10);
     res += buf;
+}
+
+inline void append_arg(string& res, const string& val) {
+    res += val;
 }
 
 inline void append_arg(string& res, const char* val) {
