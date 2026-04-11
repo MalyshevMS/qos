@@ -126,3 +126,12 @@ bool kstd::operator==(const string &left, const string &right) {
     for (int i = 0; i < left.len; i++) if (left[i] != right[i]) return false;
     return true;
 }
+
+kstd::string& kstd::string::operator=(const string &other)
+{
+    delete head;
+    len = other.len;
+    head = new char[len];
+    memcpy(head, other.head, len);
+    return *this;
+}

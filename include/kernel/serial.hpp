@@ -25,7 +25,8 @@ namespace Serial {
     }
 
     FMT(void println) {
-        Serial::write((fmt(format, args...) + '\n').c_str());
+        Serial::write(fmt(format, args...).c_str());
+        Serial::write_char('\n');
     }
 } // namespace Serial
 } // namespace Kernel

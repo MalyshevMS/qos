@@ -18,15 +18,47 @@ using namespace Mem;
 using namespace Arch;
 using namespace kstd;
 
+int x = 0; 
+int y = 0;
+int promt_y = 0;
+
+FMT(void printf) {
+    string str = fmt(format, args...);
+    Vga::printxy(str.c_str(), x, y);
+    x += str.size();
+
+    if (x > Vga::width) {
+        x = 1;
+        y++;
+    }
+
+    if (y > Vga::height) {
+        char syms[Vga::width][Vga::height];
+
+        for (int i = 0; i < Vga::width; i++) {
+            for (int j = 0; j < Vga::height - 1; j++) {
+                syms[i][j] = Vga::getc(i, j + 1);
+            }
+        }
+
+        Vga::clear();
+
+        for (int i = 0; i < Vga::width; i++) {
+            for (int j = 0; j < Vga::height; j++) {
+                Vga::putc(i, j, syms[i][j]);
+            }
+        }
+
+        y = Vga::height;
+    }
+}
+
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
-    
     meminit();
     Serial::init();
     Keyboard::init();
-    Vga::clear();
-    
     x86::pic_remap();
     x86::idt_init();
 
@@ -34,17 +66,14 @@ void kernel_main() {
     x86::pic_unmask_irq(1);
 
     INT_ENABLE;
+
+    Vga::clear();
     
-    string text1 = "Welcome to my OS!";
-    string text2 = "(Simple VGA text editor with human brain-powered saving)";
-    string hello_message = fmt("{} {}", text1, text2);
-    Vga::printxy(hello_message.c_str(), 0, 0);
-    Serial::println("Hello, {}! Test number: {}", "World", 4171);
+    const string promt = "(kernel)> ";
 
-    int x = hello_message.size();
-    int y = 0;
+    printf("{}", promt);
 
-    Vga::update_cursor(x, y);
+    string input;
 
     while (1) {
         if (Keyboard::has_data()) {
@@ -52,44 +81,39 @@ void kernel_main() {
             auto ch = Keyboard::scantochar(sc);
 
             if (ch != 0 && (ch != '\n' && ch != '\b')) {
-                Vga::putc(x, y, ch);
-                x++;
-                if (x > Vga::width) {
-                    x = 1;
-                    y++;
-                }
+                printf("{}", ch);
+                input += ch;
+                Serial::println("Current input: '{}'", input);
             }
 
             if (sc == Keyboard::SCANCODE_BACKSPACE) {
-                Vga::putc(--x, y, 0);
-                if (x < 0) {
-                    x = Vga::width;
-                    y--;
+                auto xl = x;
+                auto yl = y;
 
-                    while (Vga::getc(x, y) == 0) x--;
-                    x++;
-                }
-
-                if (y < 0) {
-                    x = 0;
-                    y = 0;
-                }
-            } else if (sc == Keyboard::SCANCODE_ENTER) {
-                x = 0;
-                y++;
-            } else if (sc == Keyboard::SCANCODE_UP) {
-                y--;
-            } else if (sc == Keyboard::SCANCODE_DOWN) {
-                y++;
-            } else if (sc == Keyboard::SCANCODE_RIGHT) {
-                x++;
-            } else if (sc == Keyboard::SCANCODE_LEFT) {
                 x--;
+                if (x == promt.size() - 1 && promt_y == y) x++;
+                if (x < 0) {
+                    x = Vga::width - 1;
+                    y--;
+                }
+                Vga::putc(x, y, 0);
+                if (xl != x && yl != y) input = input.substr(0, input.size() - 2);
             }
 
-            Vga::update_cursor(x, y);
+            if (sc == Keyboard::SCANCODE_ENTER) {
+                Serial::println("Executing command: {}", input);
+                // Command execution here
+                if (input == "help") {
+                    printf("No commands yet.\n");
+                }
+
+                printf("{}", promt);
+                promt_y = y;
+                input = "";
+            }
         }
-        
+
+        Vga::update_cursor(x, y);
         CPU_HALT;
     }
 }

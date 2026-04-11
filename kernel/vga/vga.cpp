@@ -22,7 +22,10 @@ char Vga::getc(int x, int y) {
 
 void Vga::printxy(const char *str, int x, int y) {
     for (int i = 0; str[i] != 0; i++) {
-        Vga::putc(i + x, y, str[i]);
+        if (str[i] == '\n') {
+            y++;
+            x = 0;
+        } else Vga::putc(i + x, y, str[i]);
     }
 }
 void Kernel::Vga::update_cursor(int x, int y) {

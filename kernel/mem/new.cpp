@@ -17,3 +17,7 @@ void *operator new[](size_t size) {
 void operator delete[](void *ptr) {
     if (ptr) free(ptr);
 }
+
+void operator delete(void *ptr, size_t size) {
+    if (ptr) free(ptr);
+}

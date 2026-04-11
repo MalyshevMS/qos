@@ -26,6 +26,8 @@ public:
     string& operator+=(const char* str);
     string& operator+=(char ch);
 
+    string& operator=(const string& other);
+
     size_t find(char seek, size_t from = 0) const;
 
     string substr(size_t from, size_t size = npos) const;
