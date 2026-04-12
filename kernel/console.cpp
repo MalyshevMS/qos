@@ -2,6 +2,7 @@
 #include <kernel/console.hpp>
 #include <kernel/vga.hpp>
 #include <kernel/serial.hpp>
+#include <kernel/power.hpp>
 #include <driver/keyboard.hpp>
 
 using namespace kstd;
@@ -91,13 +92,13 @@ namespace Console {
         return input.substr(pos);
     }
 
-    // Встроенные команды
     void help() {
         println("Available commands:");
         println("    clear - clears screen");
         println("    echo - outputs a string");
         println("    info - system info");
         println("    exit - exit console");
+        println("    reboot - reboot the system");
     }
 
     void clear() {
@@ -145,6 +146,8 @@ namespace Console {
             info();
         } else if (cmd == "exit") {
             exit();
+        } else if (cmd == "reboot") {
+            Hardware::reboot();
         } else {
             string err_msg = "Command not found: ";
             err_msg += cmd;

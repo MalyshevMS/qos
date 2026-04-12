@@ -32,6 +32,8 @@ void kernel_main() {
 
     INT_ENABLE;
 
+    Vga::color = 0x0F;
+
     Console::init();
     Console::run();
 

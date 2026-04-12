@@ -8,6 +8,7 @@ kernel/io/ports.cpp \
 kernel/serial/serial.cpp \
 kernel/mem/heap.cpp \
 kernel/mem/new.cpp \
+kernel/hardware/power.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
