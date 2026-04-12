@@ -148,6 +148,8 @@ namespace Console {
             exit();
         } else if (cmd == "reboot") {
             Hardware::reboot();
+        } else if (cmd == "poweroff") {
+            Hardware::poweroff();
         } else {
             string err_msg = "Command not found: ";
             err_msg += cmd;
