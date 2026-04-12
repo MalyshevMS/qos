@@ -12,7 +12,7 @@ namespace Console {
     static int cursor_y = 0;
     static int prompt_y = 0;
     static bool running = true;
-    #define prompt "(kernel)> " // TODO: make it a string
+    static string prompt;
 
     static void newline() {
         cursor_x = 0;
@@ -158,6 +158,7 @@ namespace Console {
         cursor_y = 0;
         prompt_y = 0;
         running = true;
+        prompt = "(kernel)> ";
 
         print(prompt);
         prompt_y = cursor_y;
