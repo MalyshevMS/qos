@@ -2,6 +2,7 @@
 BUILD_DIR = build
 SOURCES = \
 kernel/kernel.cpp \
+kernel/console.cpp \
 kernel/vga/vga.cpp \
 kernel/io/ports.cpp \
 kernel/serial/serial.cpp \
@@ -31,7 +32,7 @@ OBJCOPY = objcopy
 GRUB_MKRESCUE = grub-mkrescue
 QEMU = qemu-system-x86_64
 
-CXXFLAGS = -Iinclude -std=c++20 -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -c
+CXXFLAGS = -Iinclude -std=c++20 -m32 -ffreestanding -nostdlib -fno-pie -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -fno-use-cxa-atexit -c
 LDFLAGS = -m elf_i386 -T linker.ld
 ASMFLAGS = -f bin
 
