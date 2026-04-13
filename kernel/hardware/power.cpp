@@ -122,27 +122,14 @@ static bool acpi_poweroff() {
         return false;
     }
 
-    Serial::println("Checking ACPI state...");
     uint16_t pm1a_status = inw(fadt->PM1a_CNT_BLK);
-    if ((pm1a_status & 1) == 0) {
-        Serial::println("ACPI is disabled, enabling...");
-        if (fadt->SMI_CMD != 0 && fadt->ACPI_ENABLE != 0) {
-            outb(fadt->SMI_CMD, fadt->ACPI_ENABLE);
-            
-            for (int timeout = 0; timeout < 3000; timeout++) {
-                pm1a_status = inw(fadt->PM1a_CNT_BLK);
-                if ((pm1a_status & 1) == 1) {
-                    Serial::println("ACPI enabled successfully!");
-                    break;
-                }
-            }
-            
-            if ((pm1a_status & 1) == 0) {
-                Serial::println("ACPI enable timeout, continuing anyway...");
-            }
+    if ((pm1a_status & 1) == 0 && fadt->SMI_CMD != 0 && fadt->ACPI_ENABLE != 0) {
+        outb(fadt->SMI_CMD, fadt->ACPI_ENABLE);
+        
+        for (int timeout = 0; timeout < 3000; timeout++) {
+            pm1a_status = inw(fadt->PM1a_CNT_BLK);
+            if ((pm1a_status & 1) == 1) break;
         }
-    } else {
-        Serial::println("ACPI is already enabled!");
     }
 
     uint16_t SLP_TYP = get_s5_type(fadt);
@@ -153,6 +140,7 @@ static bool acpi_poweroff() {
     val &= ~(7 << 10);  // Clear SLP_TYP field
     val |= (SLP_TYP << 10) | SLP_EN;
     
+    Serial::println("Powered off.");
     outw(fadt->PM1a_CNT_BLK, val);
     
     if (fadt->PM1b_CNT_BLK != 0) {
@@ -166,42 +154,36 @@ void poweroff() {
     // Try ACPI first, don't disable interrupts yet
     if (acpi_poweroff()) {
         INT_DISABLE;
-        
-        volatile unsigned int count = 0;
-        while (count < 50000000) count++;
+        SHOW_INT_DISABLE;
         
         Serial::println("Power off failed. Hanging...");
-        for (;;) CPU_HALT;
+        for (;;) {
+            CPU_HALT;
+            SHOW_CPU_HALT;
+        }
     } else {
-        Serial::println("ACPI poweroff failed! Falling back to indefinite halt.");
-        Serial::println("System will remain powered but halted.");
         INT_DISABLE;
+        SHOW_INT_DISABLE;
     }
 
     Serial::println("Power off failed. Hanging...");
-    for (;;) CPU_HALT;
+    for (;;) {
+        CPU_HALT;
+        SHOW_CPU_HALT;
+    }
 }
 
 void reboot() {
-    
-    uint8_t val = 0x02;
-    int timeout = 0;
-    int max_timeout = 1000000;
-    
-    // Wait for keyboard controller to be ready (bit 1 clear)
-    for (timeout = 0; timeout < max_timeout && (val & 0x02); timeout++) {
-        val = inb(0x64);
-    }
-
+    uint8_t good = 0x02;
+    while (good & 0x02) good = inb(0x64);
+    Serial::println("Rebooted.");
     outb(0x64, 0xFE);
     
-    INT_DISABLE;
-    
-    volatile unsigned int reboot_wait = 0;
-    while (reboot_wait < 500000000) reboot_wait++;
-    
     Serial::println("Reboot failed. Hanging...");
-    for (;;) CPU_HALT;
+    for (;;) {
+        CPU_HALT;
+        SHOW_CPU_HALT;
+    }
 }
 
 }; // namespace Hardware
