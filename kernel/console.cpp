@@ -149,7 +149,9 @@ namespace Console {
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff") {
+            println("Starting poweroff...");
             Hardware::poweroff();
+            println("If you see this message, your ACPI controller is broken");
         } else {
             string err_msg = "Command not found: ";
             err_msg += cmd;

@@ -31,13 +31,17 @@ void kernel_main() {
     x86::pic_unmask_irq(1);
 
     INT_ENABLE;
+    SHOW_INT_ENABLE;
 
-    Vga::color = 0x0F;
+    Vga::color = 0x02;
 
     Console::init();
     Console::run();
 
     Serial::println("Console has been exited. Hanging...");
     
-    while (1) CPU_HALT;
+    while (1) {
+        CPU_HALT;
+        SHOW_CPU_HALT;
+    }
 }
