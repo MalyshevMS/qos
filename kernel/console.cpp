@@ -97,8 +97,8 @@ namespace Console {
         println("    clear - clears screen");
         println("    echo - outputs a string");
         println("    info - system info");
-        println("    exit - exit console");
         println("    reboot - reboot the system");
+        println("    exit/poweroff - power off the system");
     }
 
     void clear() {
@@ -119,13 +119,7 @@ namespace Console {
     void info() {
         println("=== System info ===");
         println("Arch: x86");
-        println("Resolution: 80x25");
-    }
-
-    void exit() {
-        print("Exiting......");
-        running = false;
-        println("Done.");
+        println("Resolution: 80x25 (VGA)");
     }
 
     void execute_command(const string& input) {
@@ -144,11 +138,9 @@ namespace Console {
             echo(args);
         } else if (cmd == "info") {
             info();
-        } else if (cmd == "exit") {
-            exit();
         } else if (cmd == "reboot") {
             Hardware::reboot();
-        } else if (cmd == "poweroff") {
+        } else if (cmd == "poweroff" || cmd == "exit") {
             println("Starting poweroff...");
             Hardware::poweroff();
             println("If you see this message, your ACPI controller is broken");
@@ -167,6 +159,9 @@ namespace Console {
         running = true;
         prompt = "(kernel)> ";
 
+        println("Welcome to QOS!");
+        println("You are now in kernel console.");
+        help();
         print(prompt);
         prompt_y = cursor_y;
     }

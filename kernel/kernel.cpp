@@ -33,12 +33,12 @@ void kernel_main() {
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
-    Vga::color = 0x02;
+    Vga::color = 0x0F;
 
     Console::init();
     Console::run();
 
-    Serial::println("Console has been exited. Hanging...");
+    Serial::println("You shouldn't have reach this far. Hanging...");
     
     while (1) {
         CPU_HALT;
