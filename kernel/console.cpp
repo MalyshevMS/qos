@@ -131,7 +131,7 @@ namespace Console {
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 32; j++) {
-                print(fmt("{} ", (char)buffer[idx]));
+                print(fmt("{}", (char)buffer[idx]));
                 idx++;
             }
 
@@ -182,7 +182,7 @@ namespace Console {
 
         println("Welcome to QOS!");
         println("You are now in kernel console.");
-        help();
+        // help();
         print(prompt);
         prompt_y = cursor_y;
     }

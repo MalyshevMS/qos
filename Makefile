@@ -1,5 +1,9 @@
 # User config
 BUILD_DIR = build
+PYTHON_DIR = py
+DISK_SIZE = 512 # Bytes TODO: Add more types (like K, M, G, etc.)
+DISK_MSG = "Hello, World!" # Only appears in disk_msg section
+
 SOURCES = \
 kernel/kernel.cpp \
 kernel/console.cpp \
@@ -24,14 +28,14 @@ arch/x86/gdt_load.asm \
 arch/x86/irq_handler.asm \
 arch/x86/multiboot_header.asm
 
-DISK_SIZE = 500 # Make it one sector only (including "Hello, Disk.")
-
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
 
 CXX = g++
 LD = ld
 NASM = nasm
+PY = python3
+DD = dd
 OBJCOPY = objcopy
 GRUB_MKRESCUE = grub-mkrescue
 QEMU = qemu-system-x86_64
@@ -72,15 +76,15 @@ $(TARGET_ISO): $(TARGET_ELF)
 
 $(TARGET_DISK): | $(BUILD_DIR)
 	@printf " DISK\t$@\n"
-	@qemu-img create -f raw $@ $(DISK_SIZE) > /dev/null 2>&1
+	@qemu-img create -f raw $@ $(DISK_SIZE) > /dev/null
 
 disk_random: $(TARGET_DISK)
 	@printf " DD\t$@\n"
-	@dd if=/dev/random of=$(TARGET_DISK) bs=$(DISK_SIZE) count=1 > /dev/null 2>&1
+	@$(DD) if=/dev/random of=$(TARGET_DISK) bs=$(DISK_SIZE) count=1 > /dev/null
 
-disk_hello: $(TARGET_DISK) disk_random
-	@printf " ECHO\t$@\n"
-	@echo "Hello, Disk." >> $(TARGET_DISK) 2>&1
+disk_msg: $(TARGET_DISK)
+	@printf " PY\t$@\n"
+	@$(PY) $(PYTHON_DIR)/disk_msg.py $(TARGET_DISK) $(DISK_MSG) $(DISK_SIZE) > /dev/null
 
 run: $(TARGET_ISO) $(TARGET_DISK)
 	@printf " QEMU\t$(TARGET_ISO)\n"
@@ -89,4 +93,4 @@ run: $(TARGET_ISO) $(TARGET_DISK)
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run clean disk_random
+.PHONY: all run clean disk_random disk_msg
