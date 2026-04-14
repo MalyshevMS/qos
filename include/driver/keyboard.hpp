@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <arch/x86/idt.hpp>
 
-namespace Kernel {
+namespace Driver {
 namespace Keyboard {
     // Scancode macros for US keyboard layout
     // Numbers

@@ -16,6 +16,7 @@
 using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
+using namespace Driver;
 using namespace kstd;
 
 KERNEL_ENTRY

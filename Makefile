@@ -13,6 +13,7 @@ arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
 driver/keyboard.cpp \
+driver/disk.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
 klib/string.cpp
@@ -22,6 +23,8 @@ arch/x86/idt_load.asm \
 arch/x86/gdt_load.asm \
 arch/x86/irq_handler.asm \
 arch/x86/multiboot_header.asm
+
+DISK_SIZE = 500 # Make it one sector only (including "Hello, Disk.")
 
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
@@ -39,6 +42,7 @@ ASMFLAGS = -f bin
 
 TARGET_ELF = $(BUILD_DIR)/kernel.elf
 TARGET_ISO = $(BUILD_DIR)/os.iso
+TARGET_DISK = $(BUILD_DIR)/disk.img
 
 all: $(TARGET_ISO)
 
@@ -66,11 +70,23 @@ $(TARGET_ISO): $(TARGET_ELF)
 	@cp grub.cfg $(BUILD_DIR)/isodir/boot/grub/grub.cfg
 	@$(GRUB_MKRESCUE) -o $@ $(BUILD_DIR)/isodir > /dev/null 2>&1
 
-run: $(TARGET_ISO)
+$(TARGET_DISK): | $(BUILD_DIR)
+	@printf " DISK\t$@\n"
+	@qemu-img create -f raw $@ $(DISK_SIZE) > /dev/null 2>&1
+
+disk_random: $(TARGET_DISK)
+	@printf " DD\t$@\n"
+	@dd if=/dev/random of=$(TARGET_DISK) bs=$(DISK_SIZE) count=1 > /dev/null 2>&1
+
+disk_hello: $(TARGET_DISK) disk_random
+	@printf " ECHO\t$@\n"
+	@echo "Hello, Disk." >> $(TARGET_DISK) 2>&1
+
+run: $(TARGET_ISO) $(TARGET_DISK)
 	@printf " QEMU\t$(TARGET_ISO)\n"
-	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio
+	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio -drive file=$(TARGET_DISK),format=raw,index=0,media=disk
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run clean
+.PHONY: all run clean disk_random

@@ -4,8 +4,10 @@
 #include <kernel/serial.hpp>
 #include <kernel/power.hpp>
 #include <driver/keyboard.hpp>
+#include <driver/disk.hpp>
 
 using namespace kstd;
+using namespace Driver;
 
 namespace Kernel {
 namespace Console {
@@ -60,7 +62,7 @@ namespace Console {
         }
     }
 
-    static void println(const string& str) {
+    static void println(const string& str = "") {
         print(str);
         print_char('\n');
     }
@@ -122,6 +124,23 @@ namespace Console {
         println("Resolution: 80x25 (VGA)");
     }
 
+    void rs() {
+        auto buffer = new uint8_t[512];
+        Disk::read_sectors_ATA_PIO(buffer, 0, 1);
+        int idx = 0;
+
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 32; j++) {
+                print(fmt("{} ", (char)buffer[idx]));
+                idx++;
+            }
+
+            println();
+        }
+
+        delete buffer;
+    }
+
     void execute_command(const string& input) {
         if (input.empty()) {
             return;
@@ -138,6 +157,8 @@ namespace Console {
             echo(args);
         } else if (cmd == "info") {
             info();
+        } else if (cmd == "rs") {
+            rs();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff" || cmd == "exit") {

@@ -1,7 +1,7 @@
 #include <driver/keyboard.hpp>
 #include <kernel/ports.hpp>
 
-namespace Kernel::Keyboard {
+namespace Driver::Keyboard {
 
 // Global state
 static uint8_t last_scancode = 0;
@@ -160,7 +160,7 @@ static const char scancode_to_char_shift[] = {
 };
 
 void keyboard_callback(const Arch::x86::Registers* regs) {
-    uint8_t scancode = Ports::inb(0x60);
+    uint8_t scancode = Kernel::Ports::inb(0x60);
     
     if (scancode & 0x80) {
         uint8_t released_key = scancode & 0x7F;
@@ -188,7 +188,7 @@ void keyboard_callback(const Arch::x86::Registers* regs) {
         }
     }
     
-    Ports::outb(0x20, 0x20);
+    Kernel::Ports::outb(0x20, 0x20);
 }
 
 void init() {
