@@ -99,6 +99,7 @@ namespace Console {
         println("    clear - clears screen");
         println("    echo - outputs a string");
         println("    info - system info");
+        println("    rfs - read first sector");
         println("    reboot - reboot the system");
         println("    exit/poweroff - power off the system");
     }
@@ -124,7 +125,7 @@ namespace Console {
         println("Resolution: 80x25 (VGA)");
     }
 
-    void rs() {
+    void rfs() {
         auto buffer = new uint8_t[512];
         Disk::read_sectors_ATA_PIO(buffer, 0, 1);
         int idx = 0;
@@ -157,8 +158,8 @@ namespace Console {
             echo(args);
         } else if (cmd == "info") {
             info();
-        } else if (cmd == "rs") {
-            rs();
+        } else if (cmd == "rfs") {
+            rfs();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff" || cmd == "exit") {
@@ -182,7 +183,7 @@ namespace Console {
 
         println("Welcome to QOS!");
         println("You are now in kernel console.");
-        // help();
+        help();
         print(prompt);
         prompt_y = cursor_y;
     }
