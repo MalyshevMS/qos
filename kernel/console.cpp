@@ -22,8 +22,8 @@ namespace Console {
         cursor_y++;
 
         if (cursor_y >= Vga::height) {
-            Vga::clear();
-            cursor_y = 0;
+            Vga::scroll_up();
+            cursor_y = Vga::height - 1;
         }
     }
 

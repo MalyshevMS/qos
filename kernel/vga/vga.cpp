@@ -12,6 +12,16 @@ void Vga::clear() {
     }
 }
 
+void Vga::scroll_up() {
+    for (int i = 0; i < width * (height - 1); i++) {
+        video[i] = video[i + width];
+    }
+    
+    for (int i = width * (height - 1); i < width * height; i++) {
+        video[i] = color << 8;
+    }
+}
+
 void Vga::putc(int x, int y, char c) {
     video[width * y + x] = (color << 8) | c;
 }

@@ -8,6 +8,7 @@ namespace Vga {
     extern char color;
 
     void clear();
+    void scroll_up();
     
     void putc(int x, int y, char c);
     char getc(int x, int y);
