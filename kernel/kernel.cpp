@@ -1,10 +1,13 @@
 #include <cfg/entry.txx>
 #include <cfg/asm.txx>
+
 #include <kernel/serial.hpp>
 #include <kernel/memory.hpp>
 #include <kernel/vga.hpp>
 #include <kernel/console.hpp>
+
 #include <driver/keyboard.hpp>
+#include <driver/timer.hpp>
 
 #include <arch/x86/gdt.hpp>
 #include <arch/x86/idt.hpp>
@@ -27,6 +30,9 @@ void kernel_main() {
     Keyboard::init();
     x86::pic_remap();
     x86::idt_init();
+
+    x86::irq_register_handler(0, (x86::irq_handler_t)&Timer::timer_callback);
+    x86::pic_unmask_irq(0);
 
     x86::irq_register_handler(1, (x86::irq_handler_t)&Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);

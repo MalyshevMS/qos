@@ -5,6 +5,7 @@
 #include <kernel/power.hpp>
 #include <driver/keyboard.hpp>
 #include <driver/disk.hpp>
+#include <driver/timer.hpp>
 
 using namespace kstd;
 using namespace Driver;
@@ -100,6 +101,7 @@ namespace Console {
         println("    echo - outputs a string");
         println("    info - system info");
         println("    rfs - read first sector");
+        println("    ktime - get kernel time");
         println("    reboot - reboot the system");
         println("    exit/poweroff - power off the system");
     }
@@ -142,6 +144,10 @@ namespace Console {
         delete buffer;
     }
 
+    void ktime() {
+        println(fmt("Kernel time: {}", (int)Timer::get_time()));
+    }
+
     void execute_command(const string& input) {
         if (input.empty()) {
             return;
@@ -160,9 +166,12 @@ namespace Console {
             info();
         } else if (cmd == "rfs") {
             rfs();
+        } else if (cmd == "ktime") {
+            ktime();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff" || cmd == "exit") {
+            ktime();
             println("Starting poweroff...");
             Hardware::poweroff();
             println("If you see this message, your ACPI controller is broken");
