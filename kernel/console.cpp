@@ -99,6 +99,8 @@ namespace Kernel::Console {
         println("    clear - clears screen");
         println("    echo - outputs a string");
         println("    info - system info");
+        println("    uptime - get machine uptime (in nanoseconds)");
+        println("    duptime - watch machine uptime (press Q to exit)");
         println("    rfs - read first sector");
         println("    ktime - get kernel time (in ticks)");
         println("    sleep - wait for 5 seconds");
@@ -119,12 +121,6 @@ namespace Kernel::Console {
         } else {
             println(args);
         }
-    }
-
-    void info() {
-        println("=== System info ===");
-        println("Arch: x86");
-        println("Resolution: 80x25 (VGA)");
     }
 
     void rfs() {
@@ -154,6 +150,23 @@ namespace Kernel::Console {
         println("Wake up!");
     }
 
+    void uptime() {
+        println(fmt("Uptime: {} nanoseconds", Timer::uptime_ns()));
+    }
+
+    void duptime() {
+        while (Keyboard::getscan() != Keyboard::SCANCODE_Q) {
+            uptime();
+        }
+    }
+
+    void info() {
+        println("=== System info ===");
+        println("Arch: x86");
+        println("Resolution: 80x25 (VGA)");
+        uptime();
+    }
+
     void execute_command(const string& input) {
         if (input.empty()) {
             return;
@@ -176,6 +189,10 @@ namespace Kernel::Console {
             ktime();
         } else if (cmd == "sleep") {
             sleep();
+        } else if (cmd == "uptime") {
+            uptime();
+        } else if (cmd == "duptime") {
+            duptime();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff" || cmd == "exit") {
@@ -239,7 +256,6 @@ namespace Kernel::Console {
                 }
             }
 
-            Serial::println("Uptime (ns): {}", Timer::uptime_ns());
             Vga::update_cursor(cursor_x, cursor_y);
             CPU_HALT;
         }

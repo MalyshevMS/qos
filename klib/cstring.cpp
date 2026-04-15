@@ -136,13 +136,64 @@ void kstd::ultoa(unsigned long value, char* str, int base) {
 
 
 void kstd::lltoa(long long value, char* str, int base) {
-    // Not supported in kernel - use lesser types instead
     if (!str) return;
-    itoa((int)value, str, base);
+    
+    char* ptr = str;
+    char* start = str;
+    int negative = 0;
+
+    if (value < 0 && base == 10) {
+        negative = 1;
+        value = -value;
+    }
+
+    if (value == 0) {
+        *ptr++ = '0';
+    } else {
+        while (value > 0) {
+            long long rem = value % base;
+            *ptr++ = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
+            value /= base;
+        }
+    }
+
+    if (negative) *ptr++ = '-';
+    *ptr = '\0';
+
+    ptr--;
+    while (start < ptr) {
+        char tmp = *start;
+        *start = *ptr;
+        *ptr = tmp;
+        start++;
+        ptr--;
+    }
 }
 
 void kstd::ulltoa(unsigned long long value, char* str, int base) {
-    // Not supported in kernel - use lesser types instead
     if (!str) return;
-    utoa((unsigned int)value, str, base);
+    
+    char* ptr = str;
+    char* start = str;
+
+    if (value == 0) {
+        *ptr++ = '0';
+    } else {
+        while (value > 0) {
+            unsigned long long rem = value % base;
+            *ptr++ = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
+            value /= base;
+        }
+    }
+
+    *ptr = '\0';
+
+    ptr--;
+    while (start < ptr) {
+        char tmp = *start;
+        *start = *ptr;
+        *ptr = tmp;
+        start++;
+        ptr--;
+    }
 }
