@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cfg/flags.txx>
 
 namespace Driver {
 namespace ACPI {
@@ -10,7 +11,7 @@ namespace ACPI {
         char OEMID[6];
         uint8_t Revision;
         uint32_t RsdtAddress;
-    } __attribute__((packed));
+    } PACK;
 
     struct ACPISDTHeader {
         char Signature[4];
@@ -22,7 +23,7 @@ namespace ACPI {
         uint32_t OEMRevision;
         uint32_t CreatorID;
         uint32_t CreatorRevision;
-    } __attribute__((packed));
+    } PACK;
 
     struct FADT {
         struct ACPISDTHeader h;
@@ -40,7 +41,25 @@ namespace ACPI {
         uint32_t PM1b_EVT_BLK;
         uint32_t PM1a_CNT_BLK;
         uint32_t PM1b_CNT_BLK;
-    } __attribute__((packed));
+    } PACK;
+
+    struct HPET {
+        struct ACPISDTHeader h;
+        uint8_t hardware_rev_id;
+        uint8_t comparator_count : 5;
+        uint8_t counter_size : 1;
+        uint8_t reserved : 1;
+        uint8_t legacy_replacement : 1;
+        uint16_t pci_vendor_id;
+        uint8_t address_space_id;    // 0 = Memory, 1 = I/O
+        uint8_t register_bit_width;
+        uint8_t register_bit_offset;
+        uint8_t reserved2;
+        uint64_t address;            // Базовый адрес HPET
+        uint8_t hpet_number;
+        uint16_t minimum_tick;
+        uint8_t page_protection;
+    } PACK;
 
     void init();
     
@@ -48,6 +67,7 @@ namespace ACPI {
     ACPISDTHeader* find_table(const char* name);
     
     uint16_t get_s5_type();
+    uint64_t get_hpet_address();
 
     bool poweroff();
 }; // namespace ACPI

@@ -129,4 +129,10 @@ bool poweroff() {
     return true;
 }
 
+uint64_t get_hpet_address() {
+    HPET* hpet = (HPET*)find_table("HPET");
+    if (hpet) return hpet->address;
+    return 0;
+}
+
 }; // namespace Driver::ACPI

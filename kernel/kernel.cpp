@@ -1,4 +1,4 @@
-#include <cfg/entry.txx>
+#include <cfg/flags.txx>
 #include <cfg/asm.txx>
 
 #include <kernel/serial.hpp>
@@ -39,6 +39,8 @@ void kernel_main() {
 
     x86::irq_register_handler(1, (x86::irq_handler_t)&Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);
+
+    Timer::init_hpet();
 
     INT_ENABLE;
     SHOW_INT_ENABLE;

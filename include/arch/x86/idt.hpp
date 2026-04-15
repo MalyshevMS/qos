@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cfg/flags.txx>
 
 namespace Arch {
 namespace x86 {
@@ -10,19 +11,19 @@ namespace x86 {
         uint8_t zero;
         uint8_t type_attr;
         uint16_t offset_high;
-    } __attribute__((packed));
+    } PACK;
 
     struct IDTPointer {
         uint16_t limit;
         uint32_t base;
-    } __attribute__((packed));
+    } PACK;
 
     struct Registers {
         uint32_t ds;
         uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
         uint32_t int_no, err_code;
         uint32_t eip, cs, eflags, useresp, ss;
-    } __attribute__((packed));
+    } PACK;
 
     typedef void (*irq_handler_t)(Registers*);
 

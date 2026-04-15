@@ -101,6 +101,7 @@ namespace Kernel::Console {
         println("    info - system info");
         println("    rfs - read first sector");
         println("    ktime - get kernel time (in ticks)");
+        println("    sleep - wait for 5 seconds");
         println("    reboot - reboot the system");
         println("    exit/poweroff - power off the system");
     }
@@ -147,6 +148,12 @@ namespace Kernel::Console {
         println(fmt("Kernel time: {}", (long)Timer::get_ticks()));
     }
 
+    void sleep() {
+        println("Sleeping for 5 seconds");
+        Timer::sleep(5000);
+        println("Wake up!");
+    }
+
     void execute_command(const string& input) {
         if (input.empty()) {
             return;
@@ -167,6 +174,8 @@ namespace Kernel::Console {
             rfs();
         } else if (cmd == "ktime") {
             ktime();
+        } else if (cmd == "sleep") {
+            sleep();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "poweroff" || cmd == "exit") {
@@ -230,7 +239,7 @@ namespace Kernel::Console {
                 }
             }
 
-            // Serial::println("Kernel time: {}", Timer::get_ticks());
+            Serial::println("Uptime (ns): {}", Timer::uptime_ns());
             Vga::update_cursor(cursor_x, cursor_y);
             CPU_HALT;
         }

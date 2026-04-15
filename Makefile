@@ -21,7 +21,8 @@ driver/keyboard.cpp \
 driver/disk.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
-klib/string.cpp
+klib/string.cpp \
+64bit/divmod.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \

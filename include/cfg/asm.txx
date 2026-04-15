@@ -1,6 +1,7 @@
 #define INT_ENABLE          asm volatile("sti")
 #define INT_DISABLE         asm volatile("cli")
 #define CPU_HALT            asm volatile("hlt")
+#define CPU_PAUSE           asm volatile("pause") // Don't do SHOW_CPU_PAUSE!
 
 #define SHOW_INT_ENABLE     Serial::println("CPU:\tINTERRUPTS ENABLED")
 #define SHOW_INT_DISABLE    Serial::println("CPU:\tINTERRUPTS DISABLED")
