@@ -101,7 +101,7 @@ namespace Console {
         println("    echo - outputs a string");
         println("    info - system info");
         println("    rfs - read first sector");
-        println("    ktime - get kernel time");
+        println("    ktime - get kernel time (in ticks)");
         println("    reboot - reboot the system");
         println("    exit/poweroff - power off the system");
     }
@@ -145,7 +145,7 @@ namespace Console {
     }
 
     void ktime() {
-        println(fmt("Kernel time: {}", (int)Timer::get_time()));
+        println(fmt("Kernel time: {}", (long)Timer::get_ticks()));
     }
 
     void execute_command(const string& input) {
@@ -231,6 +231,7 @@ namespace Console {
                 }
             }
 
+            // Serial::println("Kernel time: %d", (long)Timer::get_ticks());
             Vga::update_cursor(cursor_x, cursor_y);
             CPU_HALT;
         }

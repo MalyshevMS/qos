@@ -16,6 +16,7 @@ kernel/hardware/power.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
+driver/acpi.cpp \
 driver/timer.cpp \
 driver/keyboard.cpp \
 driver/disk.cpp \

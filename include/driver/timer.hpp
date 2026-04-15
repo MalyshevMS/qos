@@ -8,6 +8,6 @@ namespace Driver {
 namespace Timer {
     void timer_callback(Arch::x86::Registers* regs);
     
-    ull_t get_time(); // Note: returns time only since you registered callback
+    ull_t get_ticks(); // Note: returns time only since you registered callback
 }; // namespace Timer
 }; // namespace Driver
