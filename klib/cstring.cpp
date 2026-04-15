@@ -44,33 +44,29 @@ void kstd::itoa(int value, char *str, int base) {
 
 void kstd::utoa(unsigned int value, char* str, int base) {
     if (!str) return;
-    if (base < 2) base = 2;
-    if (base > 36) base = 36;
-
-    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    int i = 0;
+    
+    char* ptr = str;
+    char* start = str;
 
     if (value == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
+        *ptr++ = '0';
+    } else {
+        while (value > 0) {
+            unsigned int rem = value % base;
+            *ptr++ = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
+            value /= base;
+        }
     }
 
-    do {
-        str[i++] = digits[value % (unsigned int)base];
-        value /= (unsigned int)base;
-    } while (value > 0);
+    *ptr = '\0';
 
-    str[i] = '\0';
-
-    int start = 0;
-    int end = i - 1;
-    while (start < end) {
-        char tmp = str[start];
-        str[start] = str[end];
-        str[end] = tmp;
+    ptr--;
+    while (start < ptr) {
+        char tmp = *start;
+        *start = *ptr;
+        *ptr = tmp;
         start++;
-        end--;
+        ptr--;
     }
 }
 
@@ -111,33 +107,29 @@ void kstd::ltoa(long value, char* str, int base) {
 
 void kstd::ultoa(unsigned long value, char* str, int base) {
     if (!str) return;
-    if (base < 2) base = 2;
-    if (base > 36) base = 36;
-
-    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    int i = 0;
+    
+    char* ptr = str;
+    char* start = str;
 
     if (value == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
+        *ptr++ = '0';
+    } else {
+        while (value > 0) {
+            unsigned long rem = value % base;
+            *ptr++ = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
+            value /= base;
+        }
     }
 
-    do {
-        str[i++] = digits[value % (unsigned long)base];
-        value /= (unsigned long)base;
-    } while (value > 0);
+    *ptr = '\0';
 
-    str[i] = '\0';
-
-    int start = 0;
-    int end = i - 1;
-    while (start < end) {
-        char tmp = str[start];
-        str[start] = str[end];
-        str[end] = tmp;
+    ptr--;
+    while (start < ptr) {
+        char tmp = *start;
+        *start = *ptr;
+        *ptr = tmp;
         start++;
-        end--;
+        ptr--;
     }
 }
 

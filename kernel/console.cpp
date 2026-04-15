@@ -230,7 +230,7 @@ namespace Kernel::Console {
                 }
             }
 
-            // Serial::println("Kernel time: %d", (long)Timer::get_ticks());
+            // Serial::println("Kernel time: {}", Timer::get_ticks());
             Vga::update_cursor(cursor_x, cursor_y);
             CPU_HALT;
         }

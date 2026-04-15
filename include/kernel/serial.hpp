@@ -20,7 +20,7 @@ namespace Serial {
     void write_hex(size_t hex);
 
     FMT(inline void print) { // Forced to write here because of templates
-        Serial::write(fmt(format, args...).c_str());
+        Serial::write(kstd::fmt(format, args...).c_str());
     }
 
     FMT(inline void println) {

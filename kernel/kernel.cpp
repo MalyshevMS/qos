@@ -5,6 +5,7 @@
 #include <kernel/memory.hpp>
 #include <kernel/vga.hpp>
 #include <kernel/console.hpp>
+#include <kernel/power.hpp>
 
 #include <driver/keyboard.hpp>
 #include <driver/timer.hpp>
