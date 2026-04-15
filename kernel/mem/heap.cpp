@@ -1,7 +1,7 @@
 #include <kernel/memory.hpp>
 #include <cstdint>
 
-using namespace Kernel;
+namespace Kernel::Mem {
 
 #define HEAP_START (0x200000)
 #define HEAP_SIZE  (0x100000)
@@ -15,7 +15,7 @@ struct BlockHeader {
 
 static BlockHeader* heap_head = nullptr;
 
-void Mem::meminit() {
+void meminit() {
     heap_head = (BlockHeader*)HEAP_START;
 
     heap_head->size = HEAP_SIZE - sizeof(BlockHeader);
@@ -23,7 +23,7 @@ void Mem::meminit() {
     heap_head->next = nullptr;
 }
 
-void *Mem::malloc(size_t size) {
+void *malloc(size_t size) {
     size = (size + 7) & ~7;
     auto current = heap_head;
 
@@ -51,7 +51,7 @@ void *Mem::malloc(size_t size) {
     return nullptr;
 }
 
-void Mem::free(void *ptr) {
+void free(void *ptr) {
     if (!ptr) return;
 
     auto block = (BlockHeader*)((uint8_t*)ptr - sizeof(BlockHeader));
@@ -71,3 +71,5 @@ void Mem::free(void *ptr) {
     }
     
 }
+
+} // namespace Kernel::Mem

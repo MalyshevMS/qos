@@ -1,9 +1,9 @@
 #include <arch/x86/gdt.hpp>
 
-using namespace Arch;
+namespace Arch::x86 {
 
-static x86::GDTEntry gdt[3];
-static x86::GDTPointer gdt_ptr;
+static GDTEntry gdt[3];
+static GDTPointer gdt_ptr;
 
 extern "C" void gdt_load(uint32_t);
 
@@ -19,7 +19,7 @@ static void gdt_set_entry(int num, uint32_t base, uint32_t limit, uint8_t access
     gdt[num].access = access;
 }
 
-void x86::gdt_init() {
+void gdt_init() {
     gdt_ptr.limit = sizeof(GDTEntry) * 3 - 1;
     gdt_ptr.base = (uint32_t)&gdt;
 
@@ -34,3 +34,5 @@ void x86::gdt_init() {
 
     gdt_load((uint32_t)&gdt_ptr);
 }
+
+} // namespace Arch::x86

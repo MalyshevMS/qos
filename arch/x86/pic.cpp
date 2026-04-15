@@ -2,7 +2,8 @@
 #include <kernel/ports.hpp>
 
 using namespace Kernel::Ports;
-using namespace Arch;
+
+namespace Arch::x86 {
 
 // PIC ports
 #define PIC1_CMD    0x20
@@ -11,7 +12,7 @@ using namespace Arch;
 #define PIC2_DATA   0xA1
 #define PIC_EOI     0x20
 
-void x86::pic_remap() {
+void pic_remap() {
     // ICW1: Initialize 8259A with ICW1
     outb(PIC1_CMD, 0x11);
     outb(PIC2_CMD, 0x11);
@@ -33,7 +34,7 @@ void x86::pic_remap() {
     outb(PIC2_DATA, 0xFF);
 }
 
-void x86::pic_unmask_irq(int irq) {
+void pic_unmask_irq(int irq) {
     uint16_t port = (irq < 8) ? PIC1_DATA : PIC2_DATA;
     int bit = (irq < 8) ? irq : (irq - 8);
     
@@ -48,3 +49,5 @@ extern "C" void pic_send_eoi(int irq) {
     }
     outb(PIC1_CMD, PIC_EOI);
 }
+
+} // namespace Arch::x86

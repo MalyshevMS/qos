@@ -10,8 +10,7 @@
 using namespace kstd;
 using namespace Driver;
 
-namespace Kernel {
-namespace Console {
+namespace Kernel::Console {
     static int cursor_x = 0;
     static int cursor_y = 0;
     static int prompt_y = 0;
@@ -237,5 +236,4 @@ namespace Console {
         }
     }
 
-} // namespace Console
-} // namespace Kernel
+} // namespace Kernel::Console

@@ -2,11 +2,12 @@
 #include <kernel/ports.hpp>
 #include <kernel/serial.hpp>
 
-using namespace Driver;
 using namespace Kernel;
 using namespace Ports;
 
-void Disk::read_sectors_ATA_PIO(uint8_t* target, uint32_t LBA, uint8_t sector_count){
+namespace Driver::Disk {
+
+void read_sectors_ATA_PIO(uint8_t* target, uint32_t LBA, uint8_t sector_count){
     outb(0x1F6, (LBA >> 24) | 0xE0);
     outb(0x1F2, sector_count);
     outb(0x1F3, (uint8_t)LBA);
@@ -28,3 +29,5 @@ void Disk::read_sectors_ATA_PIO(uint8_t* target, uint32_t LBA, uint8_t sector_co
         target += 256;
     }
 }
+
+} // namespace Driver::Disk

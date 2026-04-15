@@ -1,5 +1,10 @@
 #include <driver/keyboard.hpp>
 #include <kernel/ports.hpp>
+#include <cfg/asm.txx>
+
+using namespace Arch;
+using namespace Kernel;
+using namespace Ports;
 
 namespace Driver::Keyboard {
 
@@ -159,8 +164,8 @@ static const char scancode_to_char_shift[] = {
     0,      // 0x46 - SCROLLLOCK
 };
 
-void keyboard_callback(const Arch::x86::Registers* regs) {
-    uint8_t scancode = Kernel::Ports::inb(0x60);
+void keyboard_callback(const x86::Registers* regs) {
+    uint8_t scancode = inb(0x60);
     
     if (scancode & 0x80) {
         uint8_t released_key = scancode & 0x7F;
@@ -188,7 +193,7 @@ void keyboard_callback(const Arch::x86::Registers* regs) {
         }
     }
     
-    Kernel::Ports::outb(0x20, 0x20);
+    EOI_MASTER;
 }
 
 void init() {

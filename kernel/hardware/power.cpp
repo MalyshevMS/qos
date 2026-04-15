@@ -9,8 +9,7 @@ using namespace Kernel;
 using namespace Ports;
 using namespace Driver;
 
-namespace Kernel {
-namespace Hardware {
+namespace Kernel::Hardware {
 
 void poweroff() {
     // Try ACPI first, don't disable interrupts yet
@@ -41,5 +40,4 @@ void reboot() {
     }
 }
 
-}; // namespace Hardware
-}; // namespace Kernel
+}; // namespace Kernel::Hardware

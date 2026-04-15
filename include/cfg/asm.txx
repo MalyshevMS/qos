@@ -5,3 +5,6 @@
 #define SHOW_INT_ENABLE     Serial::println("CPU:\tINTERRUPTS ENABLED")
 #define SHOW_INT_DISABLE    Serial::println("CPU:\tINTERRUPTS DISABLED")
 #define SHOW_CPU_HALT       Serial::println("CPU:\tHALTING")
+
+#define EOI_MASTER outb(0x20, 0x20)
+#define EOI_SLAVE  outb(0xA0, 0x20)

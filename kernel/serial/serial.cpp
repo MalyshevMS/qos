@@ -1,34 +1,36 @@
 #include <kernel/serial.hpp>
 #include <kernel/ports.hpp>
 
-using namespace Kernel;
+namespace Kernel::Serial {
+    
+using namespace Ports;
 
-void Serial::init() {
-    Ports::outb(COM1_PORT + 1, 0x00);
-    Ports::outb(COM1_PORT + 3, 0x80);
-    Ports::outb(COM1_PORT + 0, 0x03);
-    Ports::outb(COM1_PORT + 1, 0x00);
-    Ports::outb(COM1_PORT + 3, 0x03);
-    Ports::outb(COM1_PORT + 2, 0xC7);
-    Ports::outb(COM1_PORT + 4, 0x0B);
+void init() {
+    outb(COM1_PORT + 1, 0x00);
+    outb(COM1_PORT + 3, 0x80);
+    outb(COM1_PORT + 0, 0x03);
+    outb(COM1_PORT + 1, 0x00);
+    outb(COM1_PORT + 3, 0x03);
+    outb(COM1_PORT + 2, 0xC7);
+    outb(COM1_PORT + 4, 0x0B);
 }
 
-int Serial::is_transmit_empty() {
-    return Ports::inb(COM1_PORT + 5) & 0x20;
+int is_transmit_empty() {
+    return inb(COM1_PORT + 5) & 0x20;
 }
 
-void Serial::write_char(char c) {
+void write_char(char c) {
     while (!is_transmit_empty());
-    Ports::outb(COM1_PORT, c);
+    outb(COM1_PORT, c);
 }
 
-void Serial::write(const char* str) {
+void write(const char* str) {
     for (int i = 0; str[i] != 0; i++) {
         write_char(str[i]);
     }
 }
 
-void Serial::write_hex(size_t hex) {
+void write_hex(size_t hex) {
     char buffer[11];
     const char* hex_chars = "0123456789ABCDEF";
 
@@ -43,3 +45,5 @@ void Serial::write_hex(size_t hex) {
 
     write(buffer);
 }
+
+} // namespace Kernel::Serial

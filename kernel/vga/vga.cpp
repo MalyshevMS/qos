@@ -1,18 +1,20 @@
 #include <kernel/vga.hpp>
 #include <kernel/ports.hpp>
 
-using namespace Kernel;
+namespace Kernel::Vga {
 
-char Vga::color = 0x1F;
-unsigned short* Vga::video = ((unsigned short*)0xB8000);
+using namespace Ports;
 
-void Vga::clear() {
+char color = 0x1F;
+unsigned short* video = ((unsigned short*)0xB8000);
+
+void clear() {
     for (int i = 0; i < width * height; i++) {
         video[i] = color << 8;
     }
 }
 
-void Vga::scroll_up() {
+void scroll_up() {
     for (int i = 0; i < width * (height - 1); i++) {
         video[i] = video[i + width];
     }
@@ -22,28 +24,30 @@ void Vga::scroll_up() {
     }
 }
 
-void Vga::putc(int x, int y, char c) {
+void putc(int x, int y, char c) {
     video[width * y + x] = (color << 8) | c;
 }
 
-char Vga::getc(int x, int y) {
+char getc(int x, int y) {
     return video[width * y + x] & 0xFF;
 }
 
-void Vga::printxy(const char *str, int x, int y) {
+void printxy(const char *str, int x, int y) {
     for (int i = 0; str[i] != 0; i++) {
         if (str[i] == '\n') {
             y++;
             x = 0;
-        } else Vga::putc(i + x, y, str[i]);
+        } else putc(i + x, y, str[i]);
     }
 }
-void Kernel::Vga::update_cursor(int x, int y) {
+void update_cursor(int x, int y) {
     uint16_t pos = y * width + x;
 
-    Ports::outb(0x3D4, 0x0F);
-    Ports::outb(0x3D5, (uint8_t)pos & 0xFF);
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)pos & 0xFF);
 
-    Ports::outb(0x3D4, 0x0E);
-    Ports::outb(0x3D5, (uint8_t)(pos >> 8) & 0xFF);
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)(pos >> 8) & 0xFF);
 }
+
+} // namespace Kernel::Vga

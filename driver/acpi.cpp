@@ -14,8 +14,8 @@ RSDPDescriptor* rsdp = nullptr;
 FADT* fadt = nullptr;
 
 void init() {
-    rsdp = ACPI::find_rsdp();
-    fadt = (ACPI::FADT*)ACPI::find_table("FACP");
+    rsdp = find_rsdp();
+    fadt = (FADT*)find_table("FACP");
     
     if (!fadt) {
         Serial::println("FADT not found!");
@@ -45,12 +45,12 @@ RSDPDescriptor* find_rsdp() {
 };
 
 ACPISDTHeader* find_table(const char* name) {
-    ACPI::ACPISDTHeader* rsdt = (ACPI::ACPISDTHeader*)(uintptr_t)rsdp->RsdtAddress;
-    uint32_t entries = (rsdt->Length - sizeof(ACPI::ACPISDTHeader)) / 4;
-    uint32_t* second_headers = (uint32_t*)((uintptr_t)rsdt + sizeof(ACPI::ACPISDTHeader));
+    ACPISDTHeader* rsdt = (ACPISDTHeader*)(uintptr_t)rsdp->RsdtAddress;
+    uint32_t entries = (rsdt->Length - sizeof(ACPISDTHeader)) / 4;
+    uint32_t* second_headers = (uint32_t*)((uintptr_t)rsdt + sizeof(ACPISDTHeader));
 
     for (uint32_t i = 0; i < entries; i++) {
-        ACPI::ACPISDTHeader* h = (ACPI::ACPISDTHeader*)(uintptr_t)second_headers[i];
+        ACPISDTHeader* h = (ACPISDTHeader*)(uintptr_t)second_headers[i];
         if (memcmp(h->Signature, name, strlen(name)) == 0) {
             return h;
         }
@@ -65,10 +65,10 @@ uint16_t get_s5_type() {
     }
 
     unsigned char* dsdt = (unsigned char*)fadt->Dsdt;
-    uint32_t length = ((ACPI::ACPISDTHeader*)dsdt)->Length;
+    uint32_t length = ((ACPISDTHeader*)dsdt)->Length;
     
-    dsdt += sizeof(ACPI::ACPISDTHeader);
-    length -= sizeof(ACPI::ACPISDTHeader);
+    dsdt += sizeof(ACPISDTHeader);
+    length -= sizeof(ACPISDTHeader);
 
     for (uint32_t i = 0; i < length - 4; i++) {
         if (memcmp(&dsdt[i], "_S5_", 4) == 0) {
@@ -111,7 +111,7 @@ bool poweroff() {
         }
     }
 
-    uint16_t SLP_TYP = ACPI::get_s5_type();
+    uint16_t SLP_TYP = get_s5_type();
     uint16_t SLP_EN = 1 << 13;
 
     
