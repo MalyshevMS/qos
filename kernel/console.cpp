@@ -35,7 +35,6 @@ namespace Kernel::Console {
         } else if (ch == '\b') {
             if (cursor_x > 0) {
                 cursor_x--;
-                Vga::putc(cursor_x, cursor_y, ' ');
             }
         } else {
             Vga::putc(cursor_x, cursor_y, ch);
@@ -52,13 +51,6 @@ namespace Kernel::Console {
     static void print(const string& str) {
         for (size_t i = 0; i < str.size(); i++) {
             print_char(str[i]);
-        }
-    }
-
-    static void print_cstring(const char* str) {
-        if (!str) return;
-        while (*str) {
-            print_char(*str++);
         }
     }
 
@@ -175,6 +167,57 @@ namespace Kernel::Console {
         uptime();
     }
 
+    void systemd() {
+        clear();
+        println("                                       /\\           ");
+        println("                                      /  \\          ");
+        println("                                     / /\\ \\         ");
+        println("                            ________/ /__\\_\\________");
+        println("                            \\  ____/ /___________  /");
+        println("                             \\ \\  / /      \\ \\  / / ");
+        println("                              \\ \\/ /        \\ \\/ /  ");
+        println("                               \\ \\/          \\ \\/   ");
+        println("                               /\\ \\          /\\ \\   ");
+        println("                              / /\\ \\        / /\\ \\  ");
+        println("                             / /__\\_\\______/ /__\\ \\ ");
+        println("                            /_____________/ /______\\");
+        println("                                    \\ \\  / /        ");
+        println("                                     \\ \\/ /         ");
+        println("                                      \\  /          ");
+        println("                                       \\/           ");
+        println();
+        println("SystemD RedHat (C) CyberWeapon (TM).");
+
+        print("Installing GCC Exploit        [..........]");
+        print("\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 10; i++) {
+            print("#");
+            Timer::sleep(500);
+        }
+        println("] Done.");
+
+        print("Installing RedHat CyberWeapon [..........]");
+        print("\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 10; i++) {
+            print("#");
+            Timer::sleep(500);
+        }
+        println("] Done.");
+
+        print("Activating nanorobots         [..........]");
+        print("\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 10; i++) {
+            print("#");
+            Timer::sleep(500);
+        }
+        println("] Done.");
+        print("Big brother is wathing you.");
+
+        INT_DISABLE;
+        CPU_HALT;
+        Timer::sleep(10);
+    }
+
     void execute_command(const string& input) {
         if (input.empty()) {
             return;
@@ -212,6 +255,8 @@ namespace Kernel::Console {
             tickp();
         } else if (cmd == "ctsc") {
             ctsc();
+        } else if (cmd == "systemd") {
+            systemd();
         } else if (cmd == "poweroff" || cmd == "exit") {
             Hardware::poweroff();
             println("If you see this message, your ACPI controller is broken");
@@ -233,7 +278,6 @@ namespace Kernel::Console {
         tickp();
         println("Welcome to QOS!");
         println("You are now in kernel console.");
-        help();
         print(prompt);
         prompt_y = cursor_y;
     }
@@ -255,6 +299,7 @@ namespace Kernel::Console {
                     if (!input.empty()) {
                         input.erase(input.size() - 1, 1);
                         print_char('\b');
+                        Vga::putc(cursor_x, cursor_y, ' ');
                     }
                 }
 
