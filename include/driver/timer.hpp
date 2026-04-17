@@ -11,8 +11,12 @@ namespace Timer {
     ull_t get_ticks(); // Note: returns time only since you registered callback
 
     void init_hpet();
+    uint64_t calibrate_tsc();
 
     uint64_t uptime_ns();
+    uint64_t ktime();
+    ull_t frequency();
+    uint64_t tick_period();
 
     void sleep_ns(uint64_t nanoseconds);
     inline void sleep(uint64_t ms) { sleep_ns(ms * 1'000'000ull); }

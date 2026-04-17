@@ -99,10 +99,11 @@ namespace Kernel::Console {
         println("    clear - clears screen");
         println("    echo - outputs a string");
         println("    info - system info");
+        println("    tickp - show tick period (in femtoseconds)");
+        println("    freq - show CPU frequency (Hz and MHz)");
         println("    uptime - get machine uptime (in nanoseconds)");
         println("    duptime - watch machine uptime (press Q to exit)");
         println("    rfs - read first sector");
-        println("    ktime - get kernel time (in ticks)");
         println("    sleep - wait for 5 seconds");
         println("    reboot - reboot the system");
         println("    exit/poweroff - power off the system");
@@ -140,10 +141,6 @@ namespace Kernel::Console {
         delete buffer;
     }
 
-    void ktime() {
-        println(fmt("Kernel time: {}", (long)Timer::get_ticks()));
-    }
-
     void sleep() {
         println("Sleeping for 5 seconds");
         Timer::sleep(5000);
@@ -151,7 +148,7 @@ namespace Kernel::Console {
     }
 
     void uptime() {
-        println(fmt("Uptime: {} nanoseconds", Timer::uptime_ns()));
+        println(fmt("Uptime: {} nanoseconds", Timer::ktime()));
     }
 
     void duptime() {
@@ -160,10 +157,20 @@ namespace Kernel::Console {
         }
     }
 
+    void freq() {
+        auto freq = Timer::frequency();
+        println(fmt("CPU Frequency: {} MHz ({} Hz)", freq / 1'000'000, freq));
+    }
+
+    void tickp() {
+        println(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
+    }
+
     void info() {
         println("=== System info ===");
         println("Arch: x86");
         println("Resolution: 80x25 (VGA)");
+        freq();
         uptime();
     }
 
@@ -185,8 +192,6 @@ namespace Kernel::Console {
             info();
         } else if (cmd == "rfs") {
             rfs();
-        } else if (cmd == "ktime") {
-            ktime();
         } else if (cmd == "sleep") {
             sleep();
         } else if (cmd == "uptime") {
@@ -195,8 +200,11 @@ namespace Kernel::Console {
             duptime();
         } else if (cmd == "reboot") {
             Hardware::reboot();
+        } else if (cmd == "freq") {
+            freq();
+        } else if (cmd == "tickp") {
+            tickp();
         } else if (cmd == "poweroff" || cmd == "exit") {
-            ktime();
             println("Starting poweroff...");
             Hardware::poweroff();
             println("If you see this message, your ACPI controller is broken");
@@ -215,6 +223,7 @@ namespace Kernel::Console {
         running = true;
         prompt = "(kernel)> ";
 
+        tickp();
         println("Welcome to QOS!");
         println("You are now in kernel console.");
         help();

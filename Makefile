@@ -12,6 +12,7 @@ kernel/serial/serial.cpp \
 kernel/mem/heap.cpp \
 kernel/mem/new.cpp \
 kernel/hardware/power.cpp \
+kernel/runtime.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
@@ -21,8 +22,7 @@ driver/keyboard.cpp \
 driver/disk.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
-klib/string.cpp \
-64bit/divmod.cpp
+klib/string.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
@@ -90,7 +90,7 @@ disk_msg: $(TARGET_DISK)
 
 run: $(TARGET_ISO) $(TARGET_DISK)
 	@printf " QEMU\t$(TARGET_ISO)\n"
-	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio -drive file=$(TARGET_DISK),format=raw,index=0,media=disk
+	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio -drive file=$(TARGET_DISK),format=raw,index=0,media=disk -enable-kvm
 
 clean:
 	rm -rf $(BUILD_DIR)

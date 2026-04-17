@@ -42,6 +42,9 @@ void kernel_main() {
 
     Timer::init_hpet();
 
+    Serial::println("Kernel time: {} nanoseconds", Timer::ktime());
+    Serial::println("Zero uptime: {} nanoseconds", Timer::uptime_ns());
+
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
