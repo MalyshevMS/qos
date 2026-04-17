@@ -15,6 +15,7 @@ namespace Timer {
 
     uint64_t uptime_ns();
     uint64_t ktime();
+    inline uint64_t ktime_ms() { return ktime() / 1'000'000; }
     ull_t frequency();
     uint64_t tick_period();
 

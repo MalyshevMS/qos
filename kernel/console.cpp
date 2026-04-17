@@ -98,11 +98,12 @@ namespace Kernel::Console {
         println("Available commands:");
         println("    clear - clears screen");
         println("    echo - outputs a string");
+        println("    watch - watch command output every second, press Q to exit");
         println("    info - system info");
         println("    tickp - show tick period (in femtoseconds)");
-        println("    freq - show CPU frequency (Hz and MHz)");
-        println("    uptime - get machine uptime (in nanoseconds)");
-        println("    duptime - watch machine uptime (press Q to exit)");
+        println("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
+        println("    ctsc - show current CPU frequency (recalibrates TSC)");
+        println("    uptime - get machine uptime (in milliseconds)");
         println("    rfs - read first sector");
         println("    sleep - wait for 5 seconds");
         println("    reboot - reboot the system");
@@ -148,22 +149,21 @@ namespace Kernel::Console {
     }
 
     void uptime() {
-        println(fmt("Uptime: {} nanoseconds", Timer::ktime()));
-    }
-
-    void duptime() {
-        while (Keyboard::getscan() != Keyboard::SCANCODE_Q) {
-            uptime();
-        }
+        println(fmt("Uptime: {} milliseconds", Timer::ktime_ms()));
     }
 
     void freq() {
         auto freq = Timer::frequency();
-        println(fmt("CPU Frequency: {} MHz ({} Hz)", freq / 1'000'000, freq));
+        println(fmt("CPU Frequency (calibrated at boot): {} MHz ({} Hz)", freq / 1'000'000, freq));
     }
 
     void tickp() {
         println(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
+    }
+
+    void ctsc() {
+        auto freq = Timer::calibrate_tsc();
+        println(fmt("CPU frequency (current): {} MHz ({} Hz)", freq / 1'000'000, freq));
     }
 
     void info() {
@@ -171,6 +171,7 @@ namespace Kernel::Console {
         println("Arch: x86");
         println("Resolution: 80x25 (VGA)");
         freq();
+        ctsc();
         uptime();
     }
 
@@ -184,6 +185,13 @@ namespace Kernel::Console {
 
         if (cmd == "help") {
             help();
+        } else if (cmd == "watch") {
+            while (Keyboard::getscan() != Keyboard::SCANCODE_Q) {
+                clear();
+                println(fmt("Wathcing command '{}' (every second). Press Q to exit.", args));
+                execute_command(args);
+                Timer::sleep(1000);
+            }
         } else if (cmd == "clear") {
             clear();
         } else if (cmd == "echo") {
@@ -196,16 +204,15 @@ namespace Kernel::Console {
             sleep();
         } else if (cmd == "uptime") {
             uptime();
-        } else if (cmd == "duptime") {
-            duptime();
         } else if (cmd == "reboot") {
             Hardware::reboot();
         } else if (cmd == "freq") {
             freq();
         } else if (cmd == "tickp") {
             tickp();
+        } else if (cmd == "ctsc") {
+            ctsc();
         } else if (cmd == "poweroff" || cmd == "exit") {
-            println("Starting poweroff...");
             Hardware::poweroff();
             println("If you see this message, your ACPI controller is broken");
         } else {

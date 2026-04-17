@@ -95,7 +95,7 @@ namespace Driver::Timer {
         uint64_t hpet_start = hpet->main_counter;
         uint64_t tsc_start = rdtsc();
 
-        while (hpet->main_counter - hpet_start < 1'00'000);
+        while (hpet->main_counter - hpet_start < 100'000);
 
         uint64_t tsc_end = rdtsc();
         uint64_t hpet_end = hpet->main_counter;
@@ -103,9 +103,9 @@ namespace Driver::Timer {
         uint64_t dtsc = tsc_end - tsc_start;
         uint64_t dhpet = hpet_end - hpet_start;
 
-        uint64_t time_ns = (dhpet * (uint32_t)femtoseconds_per_tick) / 1000000ULL;
+        uint64_t time_ns = (dhpet * (uint32_t)femtoseconds_per_tick) / 1'000'000ULL;
         
-        uint64_t hz = (dtsc * 1000000000ULL) / time_ns;
+        uint64_t hz = (dtsc * 1'000'000'000ULL) / time_ns;
 
         return hz;
     }
