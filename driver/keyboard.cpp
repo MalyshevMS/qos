@@ -268,4 +268,16 @@ void flush() {
     capslock_active = false;
 }
 
+bool is_shift_pressed() {
+    return shift_pressed;
+}
+
+bool is_ctrl_pressed() {
+    return ctrl_pressed;
+}
+
+bool is_alt_pressed() {
+    return alt_pressed;
+}
+
 } // namespace Keyboard

@@ -98,7 +98,7 @@ namespace Kernel::Console {
         println("Available commands:");
         println("    clear - clears screen");
         println("    echo - outputs a string");
-        println("    watch - watch command output every second, press Q to exit");
+        println("    watch - watch command output every second, press Ctrl+C to exit");
         println("    info - system info");
         println("    tickp - show tick period (in femtoseconds)");
         println("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
@@ -186,9 +186,9 @@ namespace Kernel::Console {
         if (cmd == "help") {
             help();
         } else if (cmd == "watch") {
-            while (Keyboard::getscan() != Keyboard::SCANCODE_Q) {
+            while (Keyboard::getscan() != Keyboard::SCANCODE_C || !Keyboard::is_ctrl_pressed()) {
                 clear();
-                println(fmt("Wathcing command '{}' (every second). Press Q to exit.", args));
+                println(fmt("Wathcing command '{}' (every second). Press Ctrl+C to exit.", args));
                 execute_command(args);
                 Timer::sleep(1000);
             }

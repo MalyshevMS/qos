@@ -104,6 +104,10 @@ namespace Keyboard {
 
     uint8_t getscan();
 
+    bool is_shift_pressed();
+    bool is_ctrl_pressed();
+    bool is_alt_pressed();
+
     char getchar();
 
     bool has_data();
