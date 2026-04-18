@@ -168,47 +168,48 @@ namespace Kernel::Console {
     }
 
     void systemd() {
+        Vga::color = 0x1F;
         clear();
-        println("                                       /\\           ");
-        println("                                      /  \\          ");
-        println("                                     / /\\ \\         ");
-        println("                            ________/ /__\\_\\________");
-        println("                            \\  ____/ /___________  /");
-        println("                             \\ \\  / /      \\ \\  / / ");
-        println("                              \\ \\/ /        \\ \\/ /  ");
-        println("                               \\ \\/          \\ \\/   ");
-        println("                               /\\ \\          /\\ \\   ");
-        println("                              / /\\ \\        / /\\ \\  ");
-        println("                             / /__\\_\\______/ /__\\ \\ ");
-        println("                            /_____________/ /______\\");
-        println("                                    \\ \\  / /        ");
-        println("                                     \\ \\/ /         ");
-        println("                                      \\  /          ");
-        println("                                       \\/           ");
+        println("                                       /\\            ");
+        println("                                      /  \\           ");
+        println("                                     / /\\ \\          ");
+        println("                            ________/ /__\\ \\________ ");
+        println("                            \\  ____  ______ _____  / ");
+        println("                             \\ \\  / /      \\ \\  / /  ");
+        println("                              \\ \\/ /        \\ \\/ /   ");
+        println("                               \\  /          \\  /    ");
+        println("                               /  \\          /  \\    ");
+        println("                              / /\\ \\        / /\\ \\   ");
+        println("                             / /__\\_\\______/ /__\\ \\  ");
+        println("                            /_______ _____   ______\\ ");
+        println("                                    \\ \\  / /         ");
+        println("                                     \\ \\/ /          ");
+        println("                                      \\  /           ");
+        println("                                       \\/            ");
         println();
         println("SystemD RedHat (C) CyberWeapon (TM).");
 
-        print("Installing GCC Exploit        [..........]");
-        print("\b\b\b\b\b\b\b\b\b\b\b");
-        for (int i = 0; i < 10; i++) {
+        print("Installing GCC Exploit        [..............................]");
+        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 30; i++) {
             print("#");
-            Timer::sleep(500);
+            Timer::sleep(100);
         }
         println("] Done.");
 
-        print("Installing RedHat CyberWeapon [..........]");
-        print("\b\b\b\b\b\b\b\b\b\b\b");
-        for (int i = 0; i < 10; i++) {
+        print("Installing RedHat CyberWeapon [..............................]");
+        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 30; i++) {
             print("#");
-            Timer::sleep(500);
+            Timer::sleep(300);
         }
         println("] Done.");
 
-        print("Activating nanorobots         [..........]");
-        print("\b\b\b\b\b\b\b\b\b\b\b");
-        for (int i = 0; i < 10; i++) {
+        print("Activating nanorobots         [..............................]");
+        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        for (int i = 0; i < 30; i++) {
             print("#");
-            Timer::sleep(500);
+            Timer::sleep(250);
         }
         println("] Done.");
         print("Big brother is wathing you.");
