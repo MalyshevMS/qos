@@ -1,4 +1,4 @@
-#pragma ohce
+#pragma once
 
 #include <klib/string.hpp>
 
@@ -10,6 +10,7 @@ namespace Kernel {
     void kprintln(const kstd::string& text = "");
     void kpprint(const kstd::string& text, char color);
     void kinfo(const kstd::string& text);
+    void kdebug(const kstd::string& text);
     void kwarn(const kstd::string& text);
     void kpanic(const kstd::string& text);
     int get_cursor_x();

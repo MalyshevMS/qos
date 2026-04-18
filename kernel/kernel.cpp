@@ -29,11 +29,16 @@ KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
     meminit();
+
+    Vga::color = 0x0F;
+    kclear();
+
     Serial::init();
     Keyboard::init();
+    ACPI::init();
+    Timer::init_hpet();
     x86::pic_remap();
     x86::idt_init();
-    ACPI::init();
     
     x86::irq_register_handler(0, (x86::irq_handler_t)&Timer::timer_callback);
     x86::pic_unmask_irq(0);
@@ -41,18 +46,11 @@ void kernel_main() {
     x86::irq_register_handler(1, (x86::irq_handler_t)&Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);
 
-    Timer::init_hpet();
-
     Serial::println("Kernel time: {} nanoseconds", Timer::ktime());
     Serial::println("Zero uptime: {} nanoseconds", Timer::uptime_ns());
 
     INT_ENABLE;
     SHOW_INT_ENABLE;
-
-    Vga::color = 0x0F;
-
-    kclear();
-    kinfo("test kinfo");
 
     Console::init();
     Console::run();

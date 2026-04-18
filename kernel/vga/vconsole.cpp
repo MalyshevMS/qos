@@ -135,6 +135,14 @@ namespace Kernel {
     }
 
     void kinfo(const string &text) {
+        auto ktime = Driver::Timer::ktime_ms();
+        auto col = Vga::color;
+        Vga::color = 0x03;
+        kprintln(fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime, text));
+        Vga::color = col;
+    }
+
+    void kdebug(const string &text) {
         kpprint(text, 0x2F);
     }
 

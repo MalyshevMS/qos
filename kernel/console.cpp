@@ -135,7 +135,7 @@ namespace Kernel::Console {
         kprintln("                               /  \\          /  \\    ");
         kprintln("                              / /\\ \\        / /\\ \\   ");
         kprintln("                             / /__\\_\\______/ /__\\ \\  ");
-        kprintln("                            /_______ _____   ______\\ ");
+        kprintln("                            /_______ _____  _______\\ ");
         kprintln("                                    \\ \\  / /         ");
         kprintln("                                     \\ \\/ /          ");
         kprintln("                                      \\  /           ");

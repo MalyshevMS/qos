@@ -1,6 +1,7 @@
 #pragma once
 
 #include <klib/fmt.hpp>
+#include <kernel/vconsole.hpp>
 #include <cstdint>
 #include <cstddef>
 
@@ -20,11 +21,13 @@ namespace Serial {
     void write_hex(size_t hex);
 
     FMT(inline void print) { // Forced to write here because of templates
-        Serial::write(kstd::fmt(format, args...).c_str());
+        kstd::string str = kstd::fmt(format, args...);
+        Serial::write(str.c_str());
+        kinfo(str);
     }
 
     FMT(inline void println) {
-        Serial::write(kstd::fmt(format, args...).c_str());
+        print(format, args...);
         Serial::write_char('\n');
     }
 
