@@ -8,6 +8,7 @@ namespace Kernel {
     void kputc(int x, int y, char ch);
     void kprint(const kstd::string& text);
     void kprintln(const kstd::string& text = "");
+    void kpprint(const kstd::string& text, char color);
     void kwarn(const kstd::string& text);
     void kpanic(const kstd::string& text);
     int get_cursor_x();

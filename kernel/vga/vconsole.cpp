@@ -69,41 +69,73 @@ namespace Kernel {
         print_char('\n');
     }
 
-    void kwarn(const string &text) {
-        if (cursor_x != 0) kprintln();
+    void kpprint(const string& text, char color) {
         auto col = Vga::color;
-        Vga::color = 0xE0;
+        Vga::color = color;
         
         int width = 80;
-        int padding = (width - text.size()) / 2;
-        for (int i = 0; i < padding; i++) {
-            print_char(' ');
+        
+        if (cursor_x != 0) {
+            print_char('\n');
         }
-        kprint(text);
-        for (int i = 0; i < width - padding - text.size(); i++) {
-            print_char(' ');
+        
+        size_t start = 0;
+        
+        while (start < text.size()) {
+            size_t end = text.find('\n', start);
+            if (end == string::npos) {
+                end = text.size();
+            }
+            
+            string line = text.substr(start, end - start);
+            int line_len = line.size();
+            
+            if (line_len == 0 && end == text.size()) {
+                break;
+            }
+            
+            if (line_len <= width) {
+                int padding_left = (width - line_len) / 2;
+                int padding_right = width - padding_left - line_len;
+                
+                for (int i = 0; i < padding_left; i++) {
+                    print_char(' ');
+                }
+                if (line_len > 0) {
+                    kprint(line);
+                }
+                for (int i = 0; i < padding_right; i++) {
+                    print_char(' ');
+                }
+            } else {
+                kprint(line);
+                if (cursor_x > 0) {
+                    int remaining = width - cursor_x;
+                    for (int i = 0; i < remaining; i++) {
+                        print_char(' ');
+                    }
+                }
+            }
+            
+            if (end < text.size()) {
+                if (cursor_x != 0) {
+                    print_char('\n');
+                }
+                start = end + 1;
+            } else {
+                break;
+            }
         }
         
         Vga::color = col;
     }
 
+    void kwarn(const string &text) {
+        kpprint(text, 0xE0);
+    }
+
     void kpanic(const string &text) {
-        if (cursor_x != 0) kprintln();
-        auto col = Vga::color;
-        Vga::color = 0xCF;
-        
-        int width = 80;
-        int padding = (width - text.size()) / 2;
-        for (int i = 0; i < padding; i++) {
-            print_char(' ');
-        }
-        kprint(text);
-        for (int i = 0; i < width - padding - text.size(); i++) {
-            print_char(' ');
-        }
-        kprintln();
-        
-        Vga::color = col;
+        kpprint(text, 0xCF);
         SHOW_INT_DISABLE;
         INT_DISABLE;
         SHOW_CPU_HALT;
