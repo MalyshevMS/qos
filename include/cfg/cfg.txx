@@ -1,0 +1,1 @@
+#define CFG_VGA_TEXT_MODE 1

@@ -6,6 +6,7 @@
 #include <kernel/vga.hpp>
 #include <kernel/console.hpp>
 #include <kernel/power.hpp>
+#include <kernel/vconsole.hpp>
 
 #include <driver/keyboard.hpp>
 #include <driver/timer.hpp>
@@ -49,6 +50,12 @@ void kernel_main() {
     SHOW_INT_ENABLE;
 
     Vga::color = 0x0F;
+
+    kclear();
+    kprintln("kprintln test");
+    kwarn("kwarn test");
+    kpanic("kpanic test");
+
 
     Console::init();
     Console::run();

@@ -1,8 +1,8 @@
 #include <cfg/asm.txx>
 #include <kernel/console.hpp>
-#include <kernel/vga.hpp>
 #include <kernel/serial.hpp>
 #include <kernel/power.hpp>
+#include <kernel/vconsole.hpp>
 #include <driver/keyboard.hpp>
 #include <driver/disk.hpp>
 #include <driver/timer.hpp>
@@ -11,53 +11,9 @@ using namespace kstd;
 using namespace Driver;
 
 namespace Kernel::Console {
-    static int cursor_x = 0;
-    static int cursor_y = 0;
-    static int prompt_y = 0;
     static bool running = true;
     static string prompt;
-
-    static void newline() {
-        cursor_x = 0;
-        cursor_y++;
-
-        if (cursor_y >= Vga::height) {
-            Vga::scroll_up();
-            cursor_y = Vga::height - 1;
-        }
-    }
-
-    static void print_char(char ch) {
-        if (ch == '\n') {
-            newline();
-        } else if (ch == '\r') {
-            cursor_x = 0;
-        } else if (ch == '\b') {
-            if (cursor_x > 0) {
-                cursor_x--;
-            }
-        } else {
-            Vga::putc(cursor_x, cursor_y, ch);
-            cursor_x++;
-
-            if (cursor_x >= Vga::width) {
-                newline();
-            }
-        }
-        
-        Vga::update_cursor(cursor_x, cursor_y);
-    }
-
-    static void print(const string& str) {
-        for (size_t i = 0; i < str.size(); i++) {
-            print_char(str[i]);
-        }
-    }
-
-    static void println(const string& str = "") {
-        print(str);
-        print_char('\n');
-    }
+    static int prompt_y;
 
     static string get_command(const string& input) {
         size_t pos = input.find(' ');
@@ -87,33 +43,31 @@ namespace Kernel::Console {
     }
 
     void help() {
-        println("Available commands:");
-        println("    clear - clears screen");
-        println("    echo - outputs a string");
-        println("    watch - watch command output every second, press Ctrl+C to exit");
-        println("    info - system info");
-        println("    tickp - show tick period (in femtoseconds)");
-        println("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
-        println("    ctsc - show current CPU frequency (recalibrates TSC)");
-        println("    uptime - get machine uptime (in milliseconds)");
-        println("    rfs - read first sector");
-        println("    sleep - wait for 5 seconds");
-        println("    reboot - reboot the system");
-        println("    exit/poweroff - power off the system");
+        kprintln("Available commands:");
+        kprintln("    clear - clears screen");
+        kprintln("    echo - outputs a string");
+        kprintln("    watch - watch command output every second, press Ctrl+C to exit");
+        kprintln("    info - system info");
+        kprintln("    tickp - show tick period (in femtoseconds)");
+        kprintln("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
+        kprintln("    ctsc - show current CPU frequency (recalibrates TSC)");
+        kprintln("    uptime - get machine uptime (in milliseconds)");
+        kprintln("    rfs - read first sector");
+        kprintln("    sleep - wait for 5 seconds");
+        kprintln("    reboot - reboot the system");
+        kprintln("    exit/poweroff - power off the system");
     }
 
     void clear() {
-        Vga::clear();
-        cursor_x = 0;
-        cursor_y = 0;
+        kclear();
         prompt_y = 0;
     }
 
     void echo(const string& args) {
         if (args.empty()) {
-            print_char('\n');
+            kprintln();
         } else {
-            println(args);
+            kprintln(args);
         }
     }
 
@@ -124,95 +78,95 @@ namespace Kernel::Console {
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 32; j++) {
-                print(fmt("{}", (char)buffer[idx]));
+                kprint(fmt("{}", (char)buffer[idx]));
                 idx++;
             }
 
-            println();
+            kprintln();
         }
 
         delete buffer;
     }
 
     void sleep() {
-        println("Sleeping for 5 seconds");
+        kprintln("Sleeping for 5 seconds");
         Timer::sleep(5000);
-        println("Wake up!");
+        kprintln("Wake up!");
     }
 
     void uptime() {
-        println(fmt("Uptime: {} milliseconds", Timer::ktime_ms()));
+        kprintln(fmt("Uptime: {} milliseconds", Timer::ktime_ms()));
     }
 
     void freq() {
         auto freq = Timer::frequency();
-        println(fmt("CPU Frequency (calibrated at boot): {} MHz ({} Hz)", freq / 1'000'000, freq));
+        kprintln(fmt("CPU Frequency (calibrated at boot): {} MHz ({} Hz)", freq / 1'000'000, freq));
     }
 
     void tickp() {
-        println(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
+        kprintln(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
     }
 
     void ctsc() {
         auto freq = Timer::calibrate_tsc();
-        println(fmt("CPU frequency (current): {} MHz ({} Hz)", freq / 1'000'000, freq));
+        kprintln(fmt("CPU frequency (current): {} MHz ({} Hz)", freq / 1'000'000, freq));
     }
 
     void info() {
-        println("=== System info ===");
-        println("Arch: x86");
-        println("Resolution: 80x25 (VGA)");
+        kprintln("=== System info ===");
+        kprintln("Arch: x86");
+        kprintln("Resolution: 80x25 (VGA)");
         freq();
         ctsc();
         uptime();
     }
 
     void systemd() {
-        Vga::color = 0x1F;
+        kcolor(0x1F);
         clear();
-        println("                                       /\\            ");
-        println("                                      /  \\           ");
-        println("                                     / /\\ \\          ");
-        println("                            ________/ /__\\ \\________ ");
-        println("                            \\  ____  ______ _____  / ");
-        println("                             \\ \\  / /      \\ \\  / /  ");
-        println("                              \\ \\/ /        \\ \\/ /   ");
-        println("                               \\  /          \\  /    ");
-        println("                               /  \\          /  \\    ");
-        println("                              / /\\ \\        / /\\ \\   ");
-        println("                             / /__\\_\\______/ /__\\ \\  ");
-        println("                            /_______ _____   ______\\ ");
-        println("                                    \\ \\  / /         ");
-        println("                                     \\ \\/ /          ");
-        println("                                      \\  /           ");
-        println("                                       \\/            ");
-        println();
-        println("SystemD RedHat (C) CyberWeapon (TM).");
+        kprintln("                                       /\\            ");
+        kprintln("                                      /  \\           ");
+        kprintln("                                     / /\\ \\          ");
+        kprintln("                            ________/ /__\\ \\________ ");
+        kprintln("                            \\  ____  ______ _____  / ");
+        kprintln("                             \\ \\  / /      \\ \\  / /  ");
+        kprintln("                              \\ \\/ /        \\ \\/ /   ");
+        kprintln("                               \\  /          \\  /    ");
+        kprintln("                               /  \\          /  \\    ");
+        kprintln("                              / /\\ \\        / /\\ \\   ");
+        kprintln("                             / /__\\_\\______/ /__\\ \\  ");
+        kprintln("                            /_______ _____   ______\\ ");
+        kprintln("                                    \\ \\  / /         ");
+        kprintln("                                     \\ \\/ /          ");
+        kprintln("                                      \\  /           ");
+        kprintln("                                       \\/            ");
+        kprintln();
+        kprintln("SystemD RedHat (C) CyberWeapon (TM).");
 
-        print("Installing GCC Exploit        [..............................]");
-        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        kprint("Installing GCC Exploit        [..............................]");
+        kprint("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (int i = 0; i < 30; i++) {
-            print("#");
+            kprint("#");
             Timer::sleep(100);
         }
-        println("] Done.");
+        kprintln("] Done.");
 
-        print("Installing RedHat CyberWeapon [..............................]");
-        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        kprint("Installing RedHat CyberWeapon [..............................]");
+        kprint("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (int i = 0; i < 30; i++) {
-            print("#");
+            kprint("#");
             Timer::sleep(300);
         }
-        println("] Done.");
+        kprintln("] Done.");
 
-        print("Activating nanorobots         [..............................]");
-        print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        kprint("Activating nanorobots         [..............................]");
+        kprint("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (int i = 0; i < 30; i++) {
-            print("#");
+            kprint("#");
             Timer::sleep(250);
         }
-        println("] Done.");
-        print("Big brother is wathing you.");
+        kprintln("] Done.");
+        kprint("Big brother is wathing you.");
 
         INT_DISABLE;
         CPU_HALT;
@@ -232,7 +186,7 @@ namespace Kernel::Console {
         } else if (cmd == "watch") {
             while (Keyboard::getscan() != Keyboard::SCANCODE_C || !Keyboard::is_ctrl_pressed()) {
                 clear();
-                println(fmt("Wathcing command '{}' (every second). Press Ctrl+C to exit.", args));
+                kprintln(fmt("Wathcing command '{}' (every second). Press Ctrl+C to exit.", args));
                 execute_command(args);
                 Timer::sleep(1000);
             }
@@ -260,27 +214,25 @@ namespace Kernel::Console {
             systemd();
         } else if (cmd == "poweroff" || cmd == "exit") {
             Hardware::poweroff();
-            println("If you see this message, your ACPI controller is broken");
+            kprintln("If you see this message, your ACPI controller is broken");
         } else {
             string err_msg = "Command not found: ";
             err_msg += cmd;
-            println(err_msg);
+            kprintln(err_msg);
         }
     }
 
     void init() {
-        Vga::clear();
-        cursor_x = 0;
-        cursor_y = 0;
-        prompt_y = 0;
         running = true;
         prompt = "(kernel)> ";
 
         tickp();
-        println("Welcome to QOS!");
-        println("You are now in kernel console.");
-        print(prompt);
-        prompt_y = cursor_y;
+        kprintln("Welcome to QOS!");
+        kprintln("You are now in kernel console.");
+        kprint(prompt);
+        int cx, cy;
+        get_cursor(cx, cy);
+        prompt_y = cy;
     }
 
     void run() {
@@ -292,20 +244,22 @@ namespace Kernel::Console {
                 auto ch = Keyboard::scantochar(sc);
 
                 if (ch != 0 && ch != '\n' && ch != '\b') {
-                    print_char(ch);
+                    kprint(string(ch));
                     input += ch;
                 }
 
                 if (sc == Keyboard::SCANCODE_BACKSPACE) {
                     if (!input.empty()) {
                         input.erase(input.size() - 1, 1);
-                        print_char('\b');
-                        Vga::putc(cursor_x, cursor_y, ' ');
+                        kprint("\b");
+                        int cx, cy;
+                        get_cursor(cx, cy);
+                        kputc(cx, cy, ' ');
                     }
                 }
 
                 if (sc == Keyboard::SCANCODE_ENTER) {
-                    print_char('\n');
+                    kprintln();
                     
                     if (!input.empty()) {
                         Serial::println("Command: '{}'", input);
@@ -313,12 +267,13 @@ namespace Kernel::Console {
                     }
 
                     input.clear();
-                    print(prompt);
-                    prompt_y = cursor_y;
+                    kprint(prompt);
+                    int cx, cy;
+                    get_cursor(cx, cy);
+                    prompt_y = cy;
                 }
             }
 
-            Vga::update_cursor(cursor_x, cursor_y);
             CPU_HALT;
         }
     }

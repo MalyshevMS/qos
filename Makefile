@@ -8,6 +8,7 @@ SOURCES = \
 kernel/kernel.cpp \
 kernel/console.cpp \
 kernel/vga/vga.cpp \
+kernel/vga/vconsole.cpp \
 kernel/serial/serial.cpp \
 kernel/mem/heap.cpp \
 kernel/mem/new.cpp \

@@ -1,24 +1,16 @@
 #pragma ohce
 
-#include <klib/fmt.hpp>
+#include <klib/string.hpp>
 
 namespace Kernel {
-    void kprint_char(char ch);
-    void kwarn_char(char ch);
-    void kpanic_char();
-
-    FMT(inline void kprint) {
-        kstd::string str = kstd::fmt(format, args...);
-
-        for (size_t i = 0; i < str.size(); i++) {
-            kprint_char(str[i]);
-        }
-    }
-
-    FMT(inline void kprintln) {
-        kprint(format, args...);
-        kprint_char('\n');
-    }
-
-    
-}
+    void kclear();
+    void kcolor(char color);
+    void kputc(int x, int y, char ch);
+    void kprint(const kstd::string& text);
+    void kprintln(const kstd::string& text = "");
+    void kwarn(const kstd::string& text);
+    void kpanic(const kstd::string& text);
+    int get_cursor_x();
+    int get_cursor_y();
+    void get_cursor(int& x, int& y);
+} // namespace Kernel
