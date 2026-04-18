@@ -52,9 +52,7 @@ void kernel_main() {
     Vga::color = 0x0F;
 
     kclear();
-    kpprint("pretty text", 0x20);
-    // kpanic("kpanic test"); // Please comment this to run OS!
-
+    kinfo("test kinfo");
 
     Console::init();
     Console::run();

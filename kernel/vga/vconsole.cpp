@@ -134,6 +134,10 @@ namespace Kernel {
         kpprint(text, 0xE0);
     }
 
+    void kinfo(const string &text) {
+        kpprint(text, 0x2F);
+    }
+
     void kpanic(const string &text) {
         kpprint(text, 0xCF);
         SHOW_INT_DISABLE;
