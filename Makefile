@@ -17,6 +17,7 @@ kernel/runtime.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
+arch/x86/exceptions.cpp \
 driver/acpi.cpp \
 driver/timer.cpp \
 driver/keyboard.cpp \
