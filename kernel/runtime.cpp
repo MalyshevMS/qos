@@ -45,7 +45,7 @@ uint64_div_t uint64_divmod(uint64_t dividend, uint64_t divisor) {
 int64_div_t int64_divmod(int64_t dividend, int64_t divisor) {
     int64_div_t result;
     if (divisor == 0) {
-        kpanic("Division by zero");
+        kpanic("Division by zero!");
         result.quot = 0;
         result.rem = 0;
         return result;

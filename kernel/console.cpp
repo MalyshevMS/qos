@@ -54,6 +54,7 @@ namespace Kernel::Console {
         kprintln("    uptime - get machine uptime (in milliseconds)");
         kprintln("    rfs - read first sector");
         kprintln("    sleep - wait for 5 seconds");
+        kprintln("    divz - cause kernel panic (divide int64 by zero)");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
     }
@@ -119,6 +120,13 @@ namespace Kernel::Console {
         freq();
         ctsc();
         uptime();
+    }
+
+    void divz() {
+        kprintln("Testing division by zero (for int64_t)...");
+        auto zero = 0LL;
+        auto res = 1234LL / zero;
+        kprintln(fmt("{}", res));
     }
 
     void systemd() {
@@ -200,6 +208,8 @@ namespace Kernel::Console {
             rfs();
         } else if (cmd == "sleep") {
             sleep();
+        } else if (cmd == "divz") {
+            divz();
         } else if (cmd == "uptime") {
             uptime();
         } else if (cmd == "reboot") {

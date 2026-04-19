@@ -48,8 +48,6 @@ void kernel_main() {
 
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
-    
-    kpanic("Test panic");
 
     INT_ENABLE;
     SHOW_INT_ENABLE;
