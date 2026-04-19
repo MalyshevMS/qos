@@ -19,6 +19,7 @@ arch/x86/pic.cpp \
 arch/x86/gdt.cpp \
 arch/x86/exceptions.cpp \
 driver/acpi.cpp \
+driver/pci.cpp \
 driver/timer.cpp \
 driver/keyboard.cpp \
 driver/disk.cpp \
@@ -93,7 +94,12 @@ disk_msg: $(TARGET_DISK)
 
 run: $(TARGET_ISO) $(TARGET_DISK)
 	@printf " QEMU\t$(TARGET_ISO)\n"
-	@$(QEMU) -cdrom $(TARGET_ISO) -serial stdio -drive file=$(TARGET_DISK),format=raw,index=0,media=disk -enable-kvm
+	@$(QEMU) -cdrom $(TARGET_ISO) \
+        -enable-kvm \
+        -serial stdio \
+        -device ahci,id=ahci \
+        -drive file=$(TARGET_DISK),format=raw,id=sata_disk,if=none \
+        -device ide-hd,drive=sata_disk,bus=ahci.0
 
 clean:
 	rm -rf $(BUILD_DIR)
