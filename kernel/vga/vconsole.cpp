@@ -244,8 +244,8 @@ namespace Kernel {
         INT_DISABLE;
 
         auto col = 0x4F;
-        kcprint("Kernel panic!", col);
-        kcprint("<==== start trace ====>\nMessage:", col);
+        kpprint("Kernel panic!", col);
+        kcprint("\n<==== start trace ====>\nMessage:", col);
         kcprint(text, col);
 
         if (regs == nullptr) {
