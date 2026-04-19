@@ -19,20 +19,8 @@ namespace Serial {
     void write(const char* str);
 
     void write_hex(size_t hex);
-
-    FMT(inline void print) { // Forced to write here because of templates
-        kstd::string str = kstd::fmt(format, args...);
-        Serial::write(str.c_str());
-        kinfo(str);
-    }
-
-    FMT(inline void println) {
-        print(format, args...);
-        Serial::write_char('\n');
-    }
-
-    inline void println() {
-        Serial::write_char('\n');
-    }
+    
+    void print(const kstd::string& text);
+    void println(const kstd::string& text = "");
 } // namespace Serial
 } // namespace Kernel

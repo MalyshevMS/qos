@@ -4,6 +4,7 @@
 #include <driver/timer.hpp>
 #include <cfg/cfg.txx>
 #include <cfg/asm.txx>
+#include <cfg/flags.txx>
 
 using namespace kstd;
 
@@ -41,6 +42,24 @@ namespace Kernel {
         }
         
         Vga::update_cursor(cursor_x, cursor_y);
+    }
+
+    static string vga_to_ansi(unsigned char attr) {
+        static const int vga_to_ansi_idx[] = {0, 4, 2, 6, 1, 5, 3, 7};
+
+        unsigned char fg_color = attr & 0x0F;
+        unsigned char bg_color = (attr >> 4) & 0x0F;
+
+        auto format_part = [](unsigned char color, bool is_bg) -> string {
+            int base = is_bg ? 40 : 30;
+            int bright = (color & 0x08) ? 60 : 0;
+            int ansi_idx = vga_to_ansi_idx[color & 0x07];
+            char buff[12];
+            itoa(base + bright + ansi_idx, buff);
+            return buff;
+        };
+
+        return "\033[" + format_part(fg_color, false) + ";" + format_part(bg_color, true) + "m";
     }
 #endif
 
@@ -127,6 +146,11 @@ namespace Kernel {
             }
         }
         
+        Serial::print(vga_to_ansi(Vga::color));
+        Serial::print(text);
+        Serial::print(ANSI_CLEAR);
+        Serial::println();
+
         Vga::color = col;
     }
 
@@ -137,8 +161,13 @@ namespace Kernel {
     void kinfo(const string &text) {
         auto ktime = Driver::Timer::ktime_ms();
         auto col = Vga::color;
+        auto str = fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime, text);
         Vga::color = 0x03;
-        kprintln(fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime, text));
+        kprintln(str);
+        Serial::print(vga_to_ansi(Vga::color));
+        Serial::print(str);
+        Serial::print(ANSI_CLEAR);
+        Serial::println();
         Vga::color = col;
     }
 

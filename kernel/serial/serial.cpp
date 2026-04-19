@@ -4,6 +4,7 @@
 namespace Kernel::Serial {
     
 using namespace Ports;
+using namespace kstd;
 
 void init() {
     outb(COM1_PORT + 1, 0x00);
@@ -44,6 +45,15 @@ void write_hex(size_t hex) {
     }
 
     write(buffer);
+}
+
+void print(const string& text) {
+    write(text.c_str());
+}
+
+void println(const string& text = "") {
+    print(text);
+    write_char('\n');
 }
 
 } // namespace Kernel::Serial
