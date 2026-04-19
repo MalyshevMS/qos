@@ -274,8 +274,7 @@ namespace Kernel {
         Serial::println(ANSI_CLEAR);
 
         SHOW_CPU_HALT;
-        CPU_HALT;
-        Driver::Timer::sleep(1);
+        for (;;) CPU_HALT;
     }
 
     int get_cursor_x() {
