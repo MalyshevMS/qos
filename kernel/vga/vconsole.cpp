@@ -245,9 +245,12 @@ namespace Kernel {
 
         auto col = 0x4F;
         kcprint("Kernel panic!", col);
-        kcprint("<==== start trace ====>", col);
-        kcprint("Message:", col);
+        kcprint("<==== start trace ====>\nMessage:", col);
         kcprint(text, col);
+
+        if (regs == nullptr) {
+            regs = Driver::Timer::get_last_registers();
+        }
 
         auto regs_str = fmt(
             "ds: %x, edi: %x, esi: %x,\n"

@@ -122,7 +122,7 @@ namespace Kernel::Console {
         uptime();
     }
 
-    void divz() {
+    void divz(const string& args) {
         kprintln("Testing division by zero (for int32_t)...");
         auto zero = 0;
         auto res = 1234 / zero;
@@ -209,7 +209,7 @@ namespace Kernel::Console {
         } else if (cmd == "sleep") {
             sleep();
         } else if (cmd == "divz") {
-            divz();
+            divz(args);
         } else if (cmd == "uptime") {
             uptime();
         } else if (cmd == "reboot") {
@@ -236,8 +236,7 @@ namespace Kernel::Console {
         running = true;
         prompt = "(kernel)> ";
 
-        tickp();
-        kprintln("Welcome to QOS!");
+        kdebug("Welcome to QOS!");
         kprintln("You are now in kernel console.");
         kprint(prompt);
         int cx, cy;

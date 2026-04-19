@@ -49,12 +49,6 @@ void kernel_main() {
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
 
-    kinfo("Tesing division by zero...");
-    int a = 1234;
-    int b = 0;
-    int c = a / b;
-    kprintln(fmt("{}", c));
-
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
