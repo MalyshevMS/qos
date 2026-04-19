@@ -238,7 +238,9 @@ namespace Kernel {
 
     void kpanic(const string &text) {
         auto col = 0x4F;
-        kcprint("Kernel panic!\n<==== start trace ====>\nMessage:", col);
+        kcprint("Kernel panic!", col);
+        kcprint("<==== start trace ====>", col);
+        kcprint("Message:", col);
         kcprint(text, col);
 
         auto regs = Driver::Timer::get_last_registers();
