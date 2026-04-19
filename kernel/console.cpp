@@ -202,6 +202,14 @@ namespace Kernel::Console {
             clear();
         } else if (cmd == "echo") {
             echo(args);
+        } else if (cmd == "kinfo") {
+            kinfo(args);
+        } else if (cmd == "kdebug") {
+            kdebug(args);
+        } else if (cmd == "kwarn") {
+            kwarn(args);
+        } else if (cmd == "kpanic") {
+            kpanic(args);
         } else if (cmd == "info") {
             info();
         } else if (cmd == "rfs") {
