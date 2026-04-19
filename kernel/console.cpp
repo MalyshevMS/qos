@@ -74,9 +74,14 @@ namespace Kernel::Console {
 
     void rfs() {
         auto buffer = new uint8_t[512];
-        Disk::read_sectors_ATA_PIO(buffer, 0, 1);
-        int idx = 0;
+        bool ok = Disk::read_sectors(buffer, 0, 1);
+        if (!ok) {
+            kprintln("Disk read failed.");
+            delete[] buffer;
+            return;
+        }
 
+        int idx = 0;
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 32; j++) {
                 kprint(fmt("{}", (char)buffer[idx]));
@@ -86,7 +91,7 @@ namespace Kernel::Console {
             kprintln();
         }
 
-        delete buffer;
+        delete[] buffer;
     }
 
     void sleep() {

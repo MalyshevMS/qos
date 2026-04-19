@@ -91,4 +91,15 @@ namespace Driver::PCI {
         return nullptr;
     }
 
+    PCIDevice* find_device(uint8_t class_code, uint8_t subclass, uint8_t prog_if) {
+        for (int i = 0; i < device_count; i++) {
+            if (devices[i].class_code == class_code && devices[i].subclass == subclass) {
+                if (prog_if == 0xFF || devices[i].prog_if == prog_if) {
+                    return &devices[i];
+                }
+            }
+        }
+        return nullptr;
+    }
+
 } // namespace Driver::PCI

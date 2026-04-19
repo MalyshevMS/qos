@@ -23,6 +23,7 @@ driver/pci.cpp \
 driver/timer.cpp \
 driver/keyboard.cpp \
 driver/disk.cpp \
+driver/sata.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
 klib/string.cpp

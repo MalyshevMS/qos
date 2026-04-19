@@ -12,6 +12,7 @@
 #include <driver/timer.hpp>
 #include <driver/acpi.hpp>
 #include <driver/pci.hpp>
+#include <driver/disk.hpp>
 
 #include <arch/x86/gdt.hpp>
 #include <arch/x86/idt.hpp>
@@ -42,6 +43,7 @@ void kernel_main() {
     x86::pic_remap();
     x86::idt_init();
     PCI::init();
+    Disk::init();
     
     x86::irq_register_handler(0, (x86::handler_t)&Timer::timer_callback);
     x86::pic_unmask_irq(0);
