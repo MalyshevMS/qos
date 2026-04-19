@@ -3,9 +3,9 @@
 #define CPU_HALT            asm volatile("hlt")
 #define CPU_PAUSE           asm volatile("pause") // Don't do SHOW_CPU_PAUSE!
 
-#define SHOW_INT_ENABLE     Serial::println("CPU:\tINTERRUPTS ENABLED")
-#define SHOW_INT_DISABLE    Serial::println("CPU:\tINTERRUPTS DISABLED")
-#define SHOW_CPU_HALT       Serial::println("CPU:\tHALTING")
+#define SHOW_INT_ENABLE     kinfo("CPU:\tINTERRUPTS ENABLED")
+#define SHOW_INT_DISABLE    kinfo("CPU:\tINTERRUPTS DISABLED")
+#define SHOW_CPU_HALT       kinfo("CPU:\tHALTING")
 
 #define EOI_MASTER outb(0x20, 0x20)
 #define EOI_SLAVE  outb(0xA0, 0x20)

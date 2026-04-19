@@ -18,12 +18,12 @@ void init() {
     fadt = (FADT*)find_table("FACP");
     
     if (!fadt) {
-        Serial::println("FADT not found!");
+        kwarn("FADT not found!");
         return;
     }
 
     if (fadt->PM1a_CNT_BLK == 0) {
-        Serial::println("PM1a_CNT_BLK is 0!");
+        kwarn("PM1a_CNT_BLK is 0!");
         return;
     }
 }
@@ -60,7 +60,7 @@ ACPISDTHeader* find_table(const char* name) {
 
 uint16_t get_s5_type() {
     if (!fadt) {
-        Serial::println("FADT not initilized. Using Default S5 type: 0x5");
+        kwarn("FADT not initilized. Using Default S5 type: 0x5");
         return 0x5;
     }
 
@@ -92,12 +92,12 @@ uint16_t get_s5_type() {
 bool poweroff() {
     // Validate critical parameters
     if (!fadt) {
-        Serial::println("FADT not found!");
+        kwarn("FADT not found!");
         return false;
     }
 
     if (fadt->PM1a_CNT_BLK == 0) {
-        Serial::println("PM1a_CNT_BLK is 0!");
+        kwarn("PM1a_CNT_BLK is 0!");
         return false;
     }
 
@@ -119,7 +119,7 @@ bool poweroff() {
     val &= ~(7 << 10);  // Clear SLP_TYP field
     val |= (SLP_TYP << 10) | SLP_EN;
     
-    Serial::println("Powered off.");
+    kinfo("Powered off.");
     outw(fadt->PM1a_CNT_BLK, val);
     
     if (fadt->PM1b_CNT_BLK != 0) {

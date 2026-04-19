@@ -161,7 +161,7 @@ namespace Kernel {
     void kinfo(const string &text) {
         auto ktime = Driver::Timer::ktime_ms();
         auto col = Vga::color;
-        auto str = fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime, text);
+        auto str = fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime % 1'000, text);
         Vga::color = 0x03;
         kprintln(str);
         Serial::print(vga_to_ansi(Vga::color));

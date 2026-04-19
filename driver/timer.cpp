@@ -7,6 +7,7 @@
 using namespace Arch;
 using namespace Kernel;
 using namespace Ports;
+using namespace kstd;
 
 namespace Driver::Timer {
     struct HPETRegisters {
@@ -27,7 +28,7 @@ namespace Driver::Timer {
     static uint64_t startup_ns = 0;
     static uint64_t cpu_freq = 0;
 
-    void timer_callback(Arch::x86::Registers *regs) {
+    void timer_callback(x86::Registers *regs) {
         // TODO: maybe add more logic?
         ticks++;
 
@@ -35,7 +36,7 @@ namespace Driver::Timer {
     }
 
     void stress_cpu(uint64_t ms) {
-        Serial::println("Stressing CPU to wake it up...");
+        kinfo("Stressing CPU to wake it up...");
         uint64_t start = uptime_ns();
         uint64_t duration = ms * 1000000ULL;
 
@@ -44,7 +45,7 @@ namespace Driver::Timer {
         while (uptime_ns() - start < duration) {
             dummy = (dummy * 1.000001) + 0.000001;
         }
-        Serial::println("Stress done.");
+        kinfo("Stress done.");
     }
 
     void init_hpet() {
@@ -53,15 +54,18 @@ namespace Driver::Timer {
         femtoseconds_per_tick = hpet->capabilities >> 32;
 
         hpet->configuration |= 0x01; 
+
+        kinfo(fmt("HPET:\tTick period (femtosecond): {}", femtoseconds_per_tick));
         
-        Serial::println("HPET:\tTick period (femtosecond): {}", femtoseconds_per_tick);
         ns_multiplier = ((uint32_t)femtoseconds_per_tick / (uint32_t)1'000'000U);
-        Serial::println("HPET:\tNanoseconds multiplier: {}", ns_multiplier);
+        kinfo(fmt("HPET:\tNanoseconds multiplier: {}", ns_multiplier));
+        
         startup_ns = uptime_ns();
-        Serial::println("HPET:\tStartup time (nanoseconds): {}", startup_ns);
+        kinfo(fmt("HPET:\tStartup time (nanoseconds): {}", startup_ns));
+
         stress_cpu(500);
         cpu_freq = calibrate_tsc();
-        Serial::println("HPET:\tFrequency: {} Hz", cpu_freq);
+        kinfo(fmt("HPET:\tFrequency: {} Hz", cpu_freq));
     }
 
     uint64_t uptime_ns() {

@@ -51,7 +51,7 @@ void print(const string& text) {
     write(text.c_str());
 }
 
-void println(const string& text = "") {
+void println(const string& text) {
     print(text);
     write_char('\n');
 }

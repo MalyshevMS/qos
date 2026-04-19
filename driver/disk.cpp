@@ -17,7 +17,7 @@ void read_sectors_ATA_PIO(uint8_t* target, uint32_t LBA, uint8_t sector_count){
     outb(0x1F7, 0x20);
 
     while (!(inb(0x1F7) & 0x08)) {
-        Serial::println("Waiting for disk ready...");
+        kinfo("Waiting for disk ready...");
     }
 
     for (int j = 0; j < sector_count; j++) {

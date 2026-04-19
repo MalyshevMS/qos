@@ -262,7 +262,7 @@ namespace Kernel::Console {
                     kprintln();
                     
                     if (!input.empty()) {
-                        Serial::println("Command: '{}'", input);
+                        // Serial::println("Command: '{}'", input);
                         execute_command(input);
                     }
 

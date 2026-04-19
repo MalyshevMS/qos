@@ -46,8 +46,10 @@ void kernel_main() {
     x86::irq_register_handler(1, (x86::irq_handler_t)&Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);
 
-    Serial::println("Kernel time: {} nanoseconds", Timer::ktime());
-    Serial::println("Zero uptime: {} nanoseconds", Timer::uptime_ns());
+    kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
+    kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
+    
+    kwarn("kwarn test");
 
     INT_ENABLE;
     SHOW_INT_ENABLE;
@@ -55,7 +57,7 @@ void kernel_main() {
     Console::init();
     Console::run();
 
-    Serial::println("You shouldn't have reach this far. Hanging...");
+    kwarn("You shouldn't have reach this far. Hanging...");
     
     while (1) {
         CPU_HALT;

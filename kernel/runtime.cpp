@@ -1,4 +1,7 @@
 #include <cstdint>
+#include <kernel/vconsole.hpp>
+
+using namespace Kernel;
 
 extern "C" {
 
@@ -15,7 +18,7 @@ typedef struct {
 uint64_div_t uint64_divmod(uint64_t dividend, uint64_t divisor) {
     uint64_div_t result;
     if (divisor == 0) {
-        // TODO: Panic here
+        kpanic("Division by zero!");
         result.quot = 0;
         result.rem = 0;
         return result;
@@ -42,7 +45,7 @@ uint64_div_t uint64_divmod(uint64_t dividend, uint64_t divisor) {
 int64_div_t int64_divmod(int64_t dividend, int64_t divisor) {
     int64_div_t result;
     if (divisor == 0) {
-        // TODO: Panic here
+        kpanic("Division by zero");
         result.quot = 0;
         result.rem = 0;
         return result;
