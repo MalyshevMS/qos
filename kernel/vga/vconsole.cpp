@@ -163,12 +163,62 @@ namespace Kernel {
     void kcprint(const string& text, char color) {
         auto col = Vga::color;
         Vga::color = color;
-        kprintln(text);
-
+        
+        int width = 80;
+        
+        if (cursor_x != 0) {
+            print_char('\n');
+        }
+        
+        size_t start = 0;
+        
+        while (start < text.size()) {
+            size_t end = text.find('\n', start);
+            if (end == string::npos) {
+                end = text.size();
+            }
+            
+            string line = text.substr(start, end - start);
+            int line_len = line.size();
+            
+            if (line_len == 0 && end == text.size()) {
+                break;
+            }
+            
+            if (line_len <= width) {
+                int padding_right = width - line_len;
+                
+                if (line_len > 0) {
+                    kprint(line);
+                }
+                for (int i = 0; i < padding_right; i++) {
+                    print_char(' ');
+                }
+            } else {
+                kprint(line);
+                if (cursor_x > 0) {
+                    int remaining = width - cursor_x;
+                    for (int i = 0; i < remaining; i++) {
+                        print_char(' ');
+                    }
+                }
+            }
+            
+            if (end < text.size()) {
+                if (cursor_x != 0) {
+                    print_char('\n');
+                }
+                start = end + 1;
+            } else {
+                break;
+            }
+        }
+        
         Serial::print(vga_to_ansi(Vga::color));
         Serial::print(text);
-        Serial::print(ANSI_CLEAR);
         Serial::println();
+        Serial::print(ANSI_CLEAR);
+
         Vga::color = col;
     }
 
@@ -178,15 +228,8 @@ namespace Kernel {
 
     void kinfo(const string &text) {
         auto ktime = Driver::Timer::ktime_ms();
-        auto col = Vga::color;
         auto str = fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime % 1'000, text);
-        Vga::color = 0x03;
-        kprintln(str);
-        Serial::print(vga_to_ansi(Vga::color));
-        Serial::print(str);
-        Serial::print(ANSI_CLEAR);
-        Serial::println();
-        Vga::color = col;
+        kcprint(str, 0x03);
     }
 
     void kdebug(const string &text) {
@@ -218,6 +261,7 @@ namespace Kernel {
         kcprint("Regisers:", col);
         kcprint(regs_str, col);
         kcprint("<==== end trace ====>", col);
+        Serial::println(ANSI_CLEAR);
 
         SHOW_INT_DISABLE;
         INT_DISABLE;
