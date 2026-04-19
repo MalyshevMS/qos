@@ -52,7 +52,8 @@ namespace Kernel::Console {
         kprintln("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
         kprintln("    ctsc - show current CPU frequency (recalibrates TSC)");
         kprintln("    uptime - get machine uptime (in milliseconds)");
-        kprintln("    rfs - read first sector");
+        kprintln("    satainfo - list SATA devices");
+        kprintln("    rfs <device> - read first sector from SATA device");
         kprintln("    sleep - wait for 5 seconds");
         kprintln("    divz - cause kernel panic (divide int64 by zero)");
         kprintln("    reboot - reboot the system");
@@ -72,9 +73,44 @@ namespace Kernel::Console {
         }
     }
 
-    void rfs() {
+    void satainfo() {
+        int count = Disk::device_count();
+        kprintln(fmt("SATA devices: {}", count));
+
+        for (int i = 0; i < count; i++) {
+            uint8_t port;
+            uint32_t sig;
+            if (Disk::get_device_info(i, port, sig)) {
+                kprintln(fmt("  [{}] Port {} Signature %x", i, port, sig));
+            }
+        }
+    }
+
+    void rfs(const string& args) {
+        int device_index = 0;
+        if (!args.empty()) {
+            device_index = 0;
+            for (size_t i = 0; i < args.size(); i++) {
+                if (args[i] < '0' || args[i] > '9') {
+                    kprintln("Invalid device index.");
+                    return;
+                }
+                device_index = device_index * 10 + (args[i] - '0');
+            }
+        }
+
+        int count = Disk::device_count();
+        if (count == 0) {
+            kprintln("No SATA devices available.");
+            return;
+        }
+        if (device_index < 0 || device_index >= count) {
+            kprintln(fmt("Device index out of range: {}", device_index));
+            return;
+        }
+
         auto buffer = new uint8_t[512];
-        bool ok = Disk::read_sectors(buffer, 0, 1);
+        bool ok = Disk::read_sectors(device_index, buffer, 0, 1);
         if (!ok) {
             kprintln("Disk read failed.");
             delete[] buffer;
@@ -217,8 +253,10 @@ namespace Kernel::Console {
             kpanic(args);
         } else if (cmd == "info") {
             info();
+        } else if (cmd == "satainfo") {
+            satainfo();
         } else if (cmd == "rfs") {
-            rfs();
+            rfs(args);
         } else if (cmd == "sleep") {
             sleep();
         } else if (cmd == "divz") {

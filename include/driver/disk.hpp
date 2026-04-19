@@ -5,7 +5,8 @@
 namespace Driver {
 namespace Disk {
     void init();
-    bool read_sectors(uint8_t* target, uint32_t LBA, uint8_t sector_count);
-    void read_sectors_ATA_PIO(uint8_t* target, uint32_t LBA, uint8_t sector_count);
+    int device_count();
+    bool get_device_info(int index, uint8_t& port, uint32_t& signature);
+    bool read_sectors(int device_index, uint8_t* target, uint32_t LBA, uint8_t sector_count);
 }; // namespace Disk
 }; // namespace Driver

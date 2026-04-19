@@ -88,14 +88,19 @@ struct HBA_CMD_TBL {
     HBA_PRDT_ENTRY prdt_entry[1];
 } PACK;
 
-static volatile HBA_MEM* abar = nullptr;
-static volatile HBA_PORT* sata_port = nullptr;
-static bool sata_initialized = false;
-static int active_port = -1;
+struct SATADevice {
+    uint8_t port;
+    uint32_t signature;
+};
 
-alignas(1024) static uint8_t command_list[1024];
-alignas(256) static uint8_t fis_receive[256];
-alignas(128) static uint8_t command_table[4096];
+static volatile HBA_MEM* abar = nullptr;
+static bool sata_initialized = false;
+static SATADevice sata_devices[32];
+static int sata_device_count = 0;
+
+alignas(1024) static uint8_t command_list[32][1024];
+alignas(256) static uint8_t fis_receive[32][256];
+alignas(128) static uint8_t command_table[32][4096];
 
 static bool port_ready(volatile HBA_PORT* port) {
     uint32_t ssts = port->ssts;
@@ -134,6 +139,10 @@ static void clear_memory(void* ptr, size_t size) {
     }
 }
 
+static volatile HBA_PORT* get_port(int device_index) {
+    return &abar->ports[sata_devices[device_index].port];
+}
+
 bool init() {
     auto device = PCI::find_device(0x01, 0x06, 0x01);
     if (!device) {
@@ -152,6 +161,8 @@ bool init() {
     abar->ghc |= 1u << 1;  // IE
 
     uint32_t ports_impl = abar->pi;
+    sata_device_count = 0;
+
     for (int i = 0; i < 32; i++) {
         if (!(ports_impl & (1u << i))) {
             continue;
@@ -164,13 +175,14 @@ bool init() {
 
         uint32_t sig = port->sig;
         if (sig == 0x00000101 || sig == 0xEB140101) {
-            active_port = i;
-            sata_port = port;
-            break;
+            sata_devices[sata_device_count++] = { (uint8_t)i, sig };
+            if (sata_device_count >= 32) {
+                break;
+            }
         }
     }
 
-    if (active_port < 0 || !sata_port) {
+    if (sata_device_count == 0) {
         kwarn("SATA: no active SATA device found on AHCI ports.");
         return false;
     }
@@ -179,24 +191,41 @@ bool init() {
     clear_memory(fis_receive, sizeof(fis_receive));
     clear_memory(command_table, sizeof(command_table));
 
-    stop_cmd(sata_port);
+    for (int idx = 0; idx < sata_device_count; idx++) {
+        volatile HBA_PORT* port = get_port(idx);
+        stop_cmd(port);
 
-    sata_port->clb = (uint32_t)(uintptr_t)command_list;
-    sata_port->clbu = 0;
-    sata_port->fb = (uint32_t)(uintptr_t)fis_receive;
-    sata_port->fbu = 0;
-    sata_port->is = 0xFFFFFFFFu;
-    sata_port->ie = 0;
+        port->clb = (uint32_t)(uintptr_t)command_list[idx];
+        port->clbu = 0;
+        port->fb = (uint32_t)(uintptr_t)fis_receive[idx];
+        port->fbu = 0;
+        port->is = 0xFFFFFFFFu;
+        port->ie = 0;
 
-    start_cmd(sata_port);
+        start_cmd(port);
+    }
 
     sata_initialized = true;
-    kinfo(fmt("SATA: AHCI initialized on port {}.", active_port));
+    kinfo(fmt("SATA: AHCI initialized with {} device(s).", sata_device_count));
     return true;
 }
 
-bool read_sectors(uint8_t* target, uint32_t LBA, uint8_t sector_count) {
-    if (!sata_initialized || !sata_port || sector_count == 0) {
+int get_device_count() {
+    return sata_device_count;
+}
+
+bool get_device_info(int index, uint8_t& port, uint32_t& signature) {
+    if (index < 0 || index >= sata_device_count) {
+        return false;
+    }
+
+    port = sata_devices[index].port;
+    signature = sata_devices[index].signature;
+    return true;
+}
+
+bool read_sectors(int device_index, uint8_t* target, uint32_t LBA, uint8_t sector_count) {
+    if (!sata_initialized || device_index < 0 || device_index >= sata_device_count || sector_count == 0) {
         return false;
     }
 
@@ -204,23 +233,24 @@ bool read_sectors(uint8_t* target, uint32_t LBA, uint8_t sector_count) {
         return false;
     }
 
-    while (sata_port->tfd & 0x80) {}
+    volatile HBA_PORT* port = get_port(device_index);
+    while (port->tfd & 0x80) {}
 
-    int slot = find_command_slot(sata_port);
+    int slot = find_command_slot(port);
     if (slot < 0) {
         kwarn("SATA: no command slot available.");
         return false;
     }
 
-    auto cmd_header = reinterpret_cast<HBA_CMD_HEADER*>(command_list) + slot;
+    auto cmd_header = reinterpret_cast<HBA_CMD_HEADER*>(command_list[device_index]) + slot;
     clear_memory(cmd_header, sizeof(HBA_CMD_HEADER));
     cmd_header->cfl = 5;
     cmd_header->w = 0;
     cmd_header->prdtl = 1;
-    cmd_header->ctba = (uint32_t)(uintptr_t)command_table;
+    cmd_header->ctba = (uint32_t)(uintptr_t)command_table[device_index];
     cmd_header->ctbau = 0;
 
-    auto cmd_table = reinterpret_cast<HBA_CMD_TBL*>(command_table);
+    auto cmd_table = reinterpret_cast<HBA_CMD_TBL*>(command_table[device_index]);
     clear_memory(cmd_table, sizeof(HBA_CMD_TBL));
 
     cmd_table->prdt_entry[0].dba = (uint32_t)(uintptr_t)target;
@@ -244,12 +274,12 @@ bool read_sectors(uint8_t* target, uint32_t LBA, uint8_t sector_count) {
     cfis[12] = sector_count;
     cfis[13] = 0;
 
-    sata_port->is = 0xFFFFFFFFu;
-    sata_port->ci = (1u << slot);
+    port->is = 0xFFFFFFFFu;
+    port->ci = (1u << slot);
 
     int timeout = 0;
-    while (sata_port->ci & (1u << slot)) {
-        if (sata_port->tfd & 0x01) {
+    while (port->ci & (1u << slot)) {
+        if (port->tfd & 0x01) {
             kwarn("SATA: command failed during transfer.");
             break;
         }
@@ -259,8 +289,8 @@ bool read_sectors(uint8_t* target, uint32_t LBA, uint8_t sector_count) {
         }
     }
 
-    while (sata_port->tfd & 0x80) {}
-    if (sata_port->tfd & 0x01) {
+    while (port->tfd & 0x80) {}
+    if (port->tfd & 0x01) {
         kwarn("SATA: device reported error after transfer.");
         return false;
     }
