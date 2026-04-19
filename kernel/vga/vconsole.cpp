@@ -6,9 +6,12 @@
 #include <cfg/asm.txx>
 #include <cfg/flags.txx>
 
-using namespace kstd;
 
 namespace Kernel {
+
+    using namespace kstd;
+    using namespace Arch;
+
     static int cursor_x = 0;
     static int cursor_y = 0;
 
@@ -236,28 +239,35 @@ namespace Kernel {
         kpprint(text, 0x2F);
     }
 
-    void kpanic(const string &text) {
+    void kpanic(const string &text, const x86::Registers* regs) {
         auto col = 0x4F;
         kcprint("Kernel panic!", col);
         kcprint("<==== start trace ====>", col);
         kcprint("Message:", col);
         kcprint(text, col);
 
-        auto regs = Driver::Timer::get_last_registers();
-        auto regs_str = fmt(
-            "ds: %x, edi: %x, esi: %x,\n"
-            "ebp: %x, esp: %x, edx: %x,\n"
-            "ecx: %x, eax: %x,\n"
-            "int_no: %x, err_code: %x,\n"
-            "eip: %x, cs: %x, eflags: %x,\n"
-            "useresp: %x, ss: %x",
+        x86::Registers registers = {0};
 
-            regs->ds, regs->edi, regs->esi,
-            regs->ebp, regs->esp, regs->edx,
-            regs->ecx, regs->eax,
-            regs->int_no, regs->err_code,
-            regs->eip, regs->cs, regs->eflags,
-            regs->useresp, regs->ss
+        if (regs == nullptr) {
+            registers = *Driver::Timer::get_last_registers();
+        } else {
+            registers = *regs;
+        }
+
+        auto regs_str = fmt(
+            "ds: %x,        edi: %x,        esi: %x,\n"
+            "ebp: %x,       esp: %x,        edx: %x,\n"
+            "ecx: %x,       eax: %x,\n"
+            "int_no: %x,    err_code: %x,\n"
+            "eip: %x,       cs: %x,         eflags: %x,\n"
+            "useresp: %x,   ss: %x",
+
+            registers.ds,       registers.edi,      registers.esi,
+            registers.ebp,      registers.esp,      registers.edx,
+            registers.ecx,      registers.eax,
+            registers.int_no,   registers.err_code,
+            registers.eip,      registers.cs,       registers.eflags,
+            registers.useresp,  registers.ss
         );
 
         kcprint("Regisers:", col);

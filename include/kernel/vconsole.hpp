@@ -1,6 +1,7 @@
 #pragma once
 
 #include <klib/string.hpp>
+#include <arch/x86/idt.hpp>
 
 namespace Kernel {
     void kclear();
@@ -13,7 +14,7 @@ namespace Kernel {
     void kinfo(const kstd::string& text);
     void kdebug(const kstd::string& text);
     void kwarn(const kstd::string& text);
-    void kpanic(const kstd::string& text);
+    void kpanic(const kstd::string& text, const Arch::x86::Registers* regs = nullptr);
     int get_cursor_x();
     int get_cursor_y();
     void get_cursor(int& x, int& y);

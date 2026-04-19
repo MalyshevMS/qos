@@ -123,9 +123,9 @@ namespace Kernel::Console {
     }
 
     void divz() {
-        kprintln("Testing division by zero (for int64_t)...");
-        auto zero = 0LL;
-        auto res = 1234LL / zero;
+        kprintln("Testing division by zero (for int32_t)...");
+        auto zero = 0;
+        auto res = 1234 / zero;
         kprintln(fmt("{}", res));
     }
 

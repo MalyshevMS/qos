@@ -1,14 +1,19 @@
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
+#include <kernel/vconsole.hpp>
 
 namespace Arch::x86 {
 
+using namespace Kernel;
+
 static IDTEntry idt[256];
 static IDTPointer idt_ptr;
-static irq_handler_t irq_handlers[16] = {0};
+static handler_t irq_handlers[16] = {0};
+static handler_t exception_handlers[32] = {0};
 
 extern "C" void idt_load(uint32_t);
 extern "C" uint32_t irq_stub_table[];
+extern "C" uint32_t exception_stub_table[];
 
 void idt_set_gate(int n, uint32_t handler) {
     idt[n].offset_low = handler & 0xFFFF;
@@ -18,8 +23,12 @@ void idt_set_gate(int n, uint32_t handler) {
     idt[n].offset_high = (handler >> 16) & 0xFFFF;
 }
 
-void irq_register_handler(int irq, irq_handler_t handler) {
+void irq_register_handler(int irq, handler_t handler) {
     irq_handlers[irq] = handler;
+}
+
+void exception_register_handler(int n, handler_t handler) {
+    if (n < 32) exception_handlers[n] = handler;
 }
 
 extern "C" void irq_common_handler(Registers* regs) {
@@ -30,12 +39,24 @@ extern "C" void irq_common_handler(Registers* regs) {
     pic_send_eoi(irq);
 }
 
+extern "C" void exception_common_handler(Registers* regs) {
+    if (exception_handlers[regs->int_no] != nullptr) {
+        exception_handlers[regs->int_no](regs);
+    } else {
+        kpanic("UNHANDLED EXCEPTION", regs);
+    }
+}
+
 void idt_init() {
     idt_ptr.limit = sizeof(IDTEntry) * 256 - 1;
     idt_ptr.base = (uint32_t)&idt;
 
     for (int i = 0; i < 256; i++) {
         idt_set_gate(i, 0);
+    }
+
+    for (int i = 0; i < 32; i++) {
+        idt_set_gate(i, exception_stub_table[i]);
     }
 
     for (int i = 0; i < 16; i++) {

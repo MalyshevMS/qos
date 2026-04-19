@@ -25,11 +25,12 @@ namespace x86 {
         uint32_t eip, cs, eflags, useresp, ss;
     } PACK;
 
-    typedef void (*irq_handler_t)(Registers*);
+    typedef void (*handler_t)(Registers*);
 
     void idt_init();
     void idt_set_gate(int n, uint32_t handler);
 
-    void irq_register_handler(int irq, irq_handler_t handler);
+    void irq_register_handler(int irq, handler_t handler);
+    void exception_register_handler(int n, handler_t handler);
 } // namespace x86
 } // namespace Arch
