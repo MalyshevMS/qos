@@ -21,51 +21,35 @@ inline void format_helper(string& res, const char* fmt) {
 }
 
 inline void append_arg(string& res, int val) {
-    char buf[12]; 
-    itoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, unsigned int val) {
-    char buf[12];
-    utoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, short val) {
-    char buf[7];
-    itoa((int)val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, unsigned short val) {
-    char buf[6];
-    utoa((unsigned int)val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, long val) {
-    char buf[20];
-    ltoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, unsigned long val) {
-    char buf[20];
-    ultoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, long long val) {
-    char buf[25];
-    lltoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, unsigned long long val) {
-    char buf[25];
-    ulltoa(val, buf, 10);
-    res += buf;
+    res += to_string(val);
 }
 
 inline void append_arg(string& res, const string& val) {

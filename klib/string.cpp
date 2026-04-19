@@ -258,3 +258,52 @@ bool kstd::operator<(const string& left, const string& right) {
     }
     return left.len < right.len;
 }
+
+// to_string implementations
+kstd::string kstd::to_string(int val) {
+    char buf[12];
+    itoa(val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(unsigned int val) {
+    char buf[12];
+    utoa(val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(short val) {
+    char buf[7];
+    itoa((int)val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(unsigned short val) {
+    char buf[6];
+    utoa((unsigned int)val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(long val) {
+    char buf[20];
+    ltoa(val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(unsigned long val) {
+    char buf[20];
+    ultoa(val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(long long val) {
+    char buf[25];
+    lltoa(val, buf, 10);
+    return string(buf);
+}
+
+kstd::string kstd::to_string(unsigned long long val) {
+    char buf[25];
+    ulltoa(val, buf, 10);
+    return string(buf);
+}

@@ -50,16 +50,22 @@ namespace Kernel {
         unsigned char fg_color = attr & 0x0F;
         unsigned char bg_color = (attr >> 4) & 0x0F;
 
-        auto format_part = [](unsigned char color, bool is_bg) -> string {
-            int base = is_bg ? 40 : 30;
-            int bright = (color & 0x08) ? 60 : 0;
-            int ansi_idx = vga_to_ansi_idx[color & 0x07];
-            char buff[12];
-            itoa(base + bright + ansi_idx, buff);
-            return buff;
-        };
+        int fg_base = 30;
+        int fg_bright = (fg_color & 0x08) ? 60 : 0;
+        int fg_ansi = vga_to_ansi_idx[fg_color & 0x07];
+        string fg_part = to_string(fg_base + fg_bright + fg_ansi);
 
-        return "\033[" + format_part(fg_color, false) + ";" + format_part(bg_color, true) + "m";
+        string bg_part;
+        if (bg_color == 0) {
+            bg_part = "49";
+        } else {
+            int bg_base = 40;
+            int bg_bright = (bg_color & 0x08) ? 60 : 0;
+            int bg_ansi = vga_to_ansi_idx[bg_color & 0x07];
+            bg_part = to_string(bg_base + bg_bright + bg_ansi);
+        }
+
+        return "\033[" + fg_part + ";" + bg_part + "m";
     }
 #endif
 
