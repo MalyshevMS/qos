@@ -2,6 +2,7 @@
 #include <driver/acpi.hpp>
 #include <kernel/serial.hpp>
 #include <kernel/ports.hpp>
+#include <klib/mem.hpp>
 #include <cfg/asm.txx>
 
 using namespace Arch;
@@ -22,6 +23,7 @@ namespace Driver::Timer {
     } PACK;
 
     static ull_t ticks;
+    static x86::Registers* registers = nullptr;
     static HPETRegisters* hpet = nullptr;
     static uint32_t femtoseconds_per_tick = 0;
     static uint32_t ns_multiplier = 0;
@@ -29,10 +31,14 @@ namespace Driver::Timer {
     static uint64_t cpu_freq = 0;
 
     void timer_callback(x86::Registers *regs) {
-        // TODO: maybe add more logic?
+        memcpy(registers, regs, sizeof(x86::Registers));
         ticks++;
 
         EOI_MASTER;
+    }
+
+    const x86::Registers* get_last_registers() {
+        return registers;
     }
 
     void stress_cpu(uint64_t ms) {

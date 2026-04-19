@@ -160,6 +160,18 @@ namespace Kernel {
         Vga::color = col;
     }
 
+    void kcprint(const string& text, char color) {
+        auto col = Vga::color;
+        Vga::color = color;
+        kprintln(text);
+
+        Serial::print(vga_to_ansi(Vga::color));
+        Serial::print(text);
+        Serial::print(ANSI_CLEAR);
+        Serial::println();
+        Vga::color = col;
+    }
+
     void kwarn(const string &text) {
         kpprint(text, 0xE0);
     }
@@ -182,7 +194,31 @@ namespace Kernel {
     }
 
     void kpanic(const string &text) {
-        kpprint(text, 0xCF);
+        auto col = 0x4F;
+        kcprint("Kernel panic!\n<==== start trace ====>\nMessage:", col);
+        kcprint(text, col);
+
+        auto regs = Driver::Timer::get_last_registers();
+        auto regs_str = fmt(
+            "ds: %x, edi: %x, esi: %x,\n"
+            "ebp: %x, esp: %x, edx: %x,\n"
+            "ecx: %x, eax: %x,\n"
+            "int_no: %x, err_code: %x,\n"
+            "eip: %x, cs: %x, eflags: %x,\n"
+            "useresp: %x, ss: %x",
+
+            regs->ds, regs->edi, regs->esi,
+            regs->ebp, regs->esp, regs->edx,
+            regs->ecx, regs->eax,
+            regs->int_no, regs->err_code,
+            regs->eip, regs->cs, regs->eflags,
+            regs->useresp, regs->ss
+        );
+
+        kcprint("Regisers:", col);
+        kcprint(regs_str, col);
+        kcprint("<==== end trace ====>", col);
+
         SHOW_INT_DISABLE;
         INT_DISABLE;
         SHOW_CPU_HALT;

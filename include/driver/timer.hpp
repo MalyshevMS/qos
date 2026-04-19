@@ -7,6 +7,7 @@
 namespace Driver {
 namespace Timer {
     void timer_callback(Arch::x86::Registers* regs);
+    const Arch::x86::Registers* get_last_registers();
     
     ull_t get_ticks(); // Note: returns time only since you registered callback
 
