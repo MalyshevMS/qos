@@ -103,9 +103,7 @@ namespace Kernel {
         
         int width = 80;
         
-        if (cursor_x != 0) {
-            print_char('\n');
-        }
+        if (cursor_x != 0) kprintln();        
         
         size_t start = 0;
         
@@ -132,30 +130,38 @@ namespace Kernel {
                 if (line_len > 0) {
                     kprint(line);
                 }
-                for (int i = 0; i < padding_right; i++) {
+                for (int i = 0; i < padding_right - 1; i++) {
                     print_char(' ');
                 }
+
+                kputc(cursor_x, cursor_y, ' ');
+                Vga::color = col;
+                kprintln();
             } else {
                 kprint(line);
                 if (cursor_x > 0) {
                     int remaining = width - cursor_x;
-                    for (int i = 0; i < remaining; i++) {
+                    for (int i = 0; i < remaining - 1; i++) {
                         print_char(' ');
                     }
+
+                    kputc(cursor_x, cursor_y, ' ');
+                    Vga::color = col;
+                    kprintln();
                 }
             }
             
             if (end < text.size()) {
-                if (cursor_x != 0) {
-                    print_char('\n');
-                }
+                if (cursor_x != 0) kprintln();
+
                 start = end + 1;
             } else {
                 break;
             }
         }
         
-        Serial::print(vga_to_ansi(Vga::color));
+        Serial::print(ANSI_CLEAR);
+        Serial::print(vga_to_ansi(color));
         Serial::print(text);
         Serial::print(ANSI_CLEAR);
         Serial::println();
@@ -217,6 +223,7 @@ namespace Kernel {
             }
         }
         
+        Serial::print(ANSI_CLEAR);
         Serial::print(vga_to_ansi(Vga::color));
         Serial::print(text);
         Serial::println();

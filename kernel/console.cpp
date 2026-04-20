@@ -46,6 +46,10 @@ namespace Kernel::Console {
         kprintln("Available commands:");
         kprintln("    clear - clears screen");
         kprintln("    echo - outputs a string");
+        kprintln("    kinfo - simulate kinfo() - basic kernel info messages");
+        kprintln("    kdebug - simulate kdebug() - debug messages");
+        kprintln("    kwarn - simulate kwarn() - warnings");
+        kprintln("    kpanic - simulate kpanic() - kernel panic (will cause real panic)");
         kprintln("    watch - watch command output every second, press Ctrl+C to exit");
         kprintln("    info - system info");
         kprintln("    tickp - show tick period (in femtoseconds)");
@@ -55,7 +59,7 @@ namespace Kernel::Console {
         kprintln("    satainfo - list SATA devices");
         kprintln("    rfs <device> - read first sector from SATA device");
         kprintln("    sleep - wait for 5 seconds");
-        kprintln("    divz - cause kernel panic (divide int64 by zero)");
+        kprintln("    divz - cause kernel panic (divide int32 by zero)");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
     }
@@ -163,7 +167,7 @@ namespace Kernel::Console {
         uptime();
     }
 
-    void divz(const string& args) {
+    void divz() {
         kprintln("Testing division by zero (for int32_t)...");
         auto zero = 0;
         auto res = 1234 / zero;
@@ -260,7 +264,7 @@ namespace Kernel::Console {
         } else if (cmd == "sleep") {
             sleep();
         } else if (cmd == "divz") {
-            divz(args);
+            divz();
         } else if (cmd == "uptime") {
             uptime();
         } else if (cmd == "reboot") {

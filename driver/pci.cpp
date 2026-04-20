@@ -36,7 +36,7 @@ namespace Driver::PCI {
         uint32_t reg0 = read_dword(bus, device, function, 0);
         uint16_t vendor_id = reg0 & 0xFFFF;
         
-        if (vendor_id == 0xFFFF) return; // Устройства нет
+        if (vendor_id == 0xFFFF) return;
 
         PCIDevice& dev = devices[device_count];
         dev.bus = bus;
@@ -45,13 +45,11 @@ namespace Driver::PCI {
         dev.vendor_id = vendor_id;
         dev.device_id = (reg0 >> 16) & 0xFFFF;
 
-        // Читаем класс и подкласс (регистр 0x08)
         uint32_t reg8 = read_dword(bus, device, function, 0x08);
         dev.class_code = (reg8 >> 24) & 0xFF;
         dev.subclass   = (reg8 >> 16) & 0xFF;
         dev.prog_if    = (reg8 >> 8) & 0xFF;
 
-        // Читаем BAR'ы (регистры 0x10 - 0x24)
         for (int i = 0; i < 6; i++) {
             dev.bar[i] = read_dword(bus, device, function, 0x10 + (i * 4));
         }
@@ -65,15 +63,13 @@ namespace Driver::PCI {
         kinfo("PCI: Enumerating devices...");
         device_count = 0;
 
-        // Перебор всех шин, устройств и функций
         for (int bus = 0; bus < 256; bus++) {
             for (int dev = 0; dev < 32; dev++) {
-                // Проверяем 0-ю функцию, если она мультифункциональная — проверим остальные
                 uint32_t header_type = (read_dword(bus, dev, 0, 0x0C) >> 16) & 0xFF;
                 
                 check_device(bus, dev, 0);
                 
-                if (header_type & 0x80) { // Мультифункциональное устройство
+                if (header_type & 0x80) {
                     for (int func = 1; func < 8; func++) {
                         check_device(bus, dev, func);
                     }

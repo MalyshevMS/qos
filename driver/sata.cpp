@@ -110,7 +110,7 @@ static bool port_ready(volatile HBA_PORT* port) {
 }
 
 static void start_cmd(volatile HBA_PORT* port) {
-    while (port->cmd & HBA_PxCMD_CR) {}
+    while (port->cmd & HBA_PxCMD_CR);
     port->cmd |= HBA_PxCMD_FRE;
     port->cmd |= HBA_PxCMD_ST;
 }
@@ -118,8 +118,8 @@ static void start_cmd(volatile HBA_PORT* port) {
 static void stop_cmd(volatile HBA_PORT* port) {
     port->cmd &= ~HBA_PxCMD_ST;
     port->cmd &= ~HBA_PxCMD_FRE;
-    while (port->cmd & HBA_PxCMD_CR) {}
-    while (port->cmd & HBA_PxCMD_FR) {}
+    while (port->cmd & HBA_PxCMD_CR);
+    while (port->cmd & HBA_PxCMD_FR);
 }
 
 static int find_command_slot(volatile HBA_PORT* port) {
