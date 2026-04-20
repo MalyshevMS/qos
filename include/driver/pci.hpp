@@ -26,5 +26,8 @@ namespace PCI {
     void init();
     PCIDevice* find_device(uint8_t class_code, uint8_t subclass);
     PCIDevice* find_device(uint8_t class_code, uint8_t subclass, uint8_t prog_if);
+
+    const PCIDevice* get_devices();
+    int get_device_count();
 }; // namespace PCI
 }; // namespace Driver

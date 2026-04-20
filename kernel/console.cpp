@@ -4,6 +4,7 @@
 #include <kernel/power.hpp>
 #include <kernel/vconsole.hpp>
 #include <driver/keyboard.hpp>
+#include <driver/pci.hpp>
 #include <driver/disk.hpp>
 #include <driver/timer.hpp>
 
@@ -56,6 +57,7 @@ namespace Kernel::Console {
         kprintln("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
         kprintln("    ctsc - show current CPU frequency (recalibrates TSC)");
         kprintln("    uptime - get machine uptime (in milliseconds)");
+        kprintln("    lspci - list PCI devices");
         kprintln("    satainfo - list SATA devices");
         kprintln("    rfs <device> - read first sector from SATA device");
         kprintln("    sleep - wait for 5 seconds");
@@ -74,6 +76,16 @@ namespace Kernel::Console {
             kprintln();
         } else {
             kprintln(args);
+        }
+    }
+
+    void lspci() {
+        auto devs = PCI::get_devices();
+        auto count = PCI::get_device_count();
+
+        for (int i = 0; i < count; i++) {
+            auto& dev = devs[i];
+            kprintln(fmt("ID:%x:%x Class:%x Sub:%x", dev.vendor_id, dev.device_id, dev.class_code, dev.subclass));
         }
     }
 
@@ -257,6 +269,8 @@ namespace Kernel::Console {
             kpanic(args);
         } else if (cmd == "info") {
             info();
+        } else if (cmd == "lspci") {
+            lspci();
         } else if (cmd == "satainfo") {
             satainfo();
         } else if (cmd == "rfs") {

@@ -2,7 +2,8 @@
 BUILD_DIR = build
 PYTHON_DIR = py
 DISK_SIZE = 512 # Bytes TODO: Add more types (like K, M, G, etc.)
-DISK_MSG = "Hello, World!" # Only appears in disk_msg section
+DISK_MSG_1 = "Hello, from disk 1" # Only appears in disk_msg section
+DISK_MSG_2 = "Hello, from disk 2"
 
 SOURCES = \
 kernel/kernel.cpp \
@@ -53,7 +54,8 @@ ASMFLAGS = -f bin
 
 TARGET_ELF = $(BUILD_DIR)/kernel.elf
 TARGET_ISO = $(BUILD_DIR)/os.iso
-TARGET_DISK = $(BUILD_DIR)/disk.img
+TARGET_DISK_1 = $(BUILD_DIR)/disk_1.img
+TARGET_DISK_2 = $(BUILD_DIR)/disk_2.img
 
 all: $(TARGET_ISO)
 
@@ -81,28 +83,40 @@ $(TARGET_ISO): $(TARGET_ELF)
 	@cp grub.cfg $(BUILD_DIR)/isodir/boot/grub/grub.cfg
 	@$(GRUB_MKRESCUE) -o $@ $(BUILD_DIR)/isodir > /dev/null 2>&1
 
-$(TARGET_DISK): | $(BUILD_DIR)
+$(TARGET_DISK_1): | $(BUILD_DIR)
 	@printf " DISK\t$@\n"
 	@qemu-img create -f raw $@ $(DISK_SIZE) > /dev/null
 
-disk_random: $(TARGET_DISK)
+$(TARGET_DISK_2): | $(BUILD_DIR)
+	@printf " DISK\t$@\n"
+	@qemu-img create -f raw $@ $(DISK_SIZE) > /dev/null
+
+disk_random: $(TARGET_DISK_1) $(TARGET_DISK_2)
 	@printf " DD\t$@\n"
-	@$(DD) if=/dev/random of=$(TARGET_DISK) bs=$(DISK_SIZE) count=1 > /dev/null
+	@$(DD) if=/dev/random of=$(TARGET_DISK_1) bs=$(DISK_SIZE) count=1 > /dev/null
+	@$(DD) if=/dev/random of=$(TARGET_DISK_2) bs=$(DISK_SIZE) count=1 > /dev/null
 
-disk_msg: $(TARGET_DISK)
+disk_msg_1: $(TARGET_DISK_1)
 	@printf " PY\t$@\n"
-	@$(PY) $(PYTHON_DIR)/disk_msg.py $(TARGET_DISK) $(DISK_MSG) $(DISK_SIZE) > /dev/null
+	@$(PY) $(PYTHON_DIR)/disk_msg.py $(TARGET_DISK_1) $(DISK_MSG_1) $(DISK_SIZE) > /dev/null
 
-run: $(TARGET_ISO) $(TARGET_DISK)
+disk_msg_2: $(TARGET_DISK_2)
+	@printf " PY\t$@\n"
+	@$(PY) $(PYTHON_DIR)/disk_msg.py $(TARGET_DISK_2) $(DISK_MSG_2) $(DISK_SIZE) > /dev/null
+
+run: $(TARGET_ISO) $(TARGET_DISK_1) $(TARGET_DISK_2)
 	@printf " QEMU\t$(TARGET_ISO)\n"
 	@$(QEMU) -cdrom $(TARGET_ISO) \
         -enable-kvm \
         -serial stdio \
         -device ahci,id=ahci \
-        -drive file=$(TARGET_DISK),format=raw,id=sata_disk,if=none \
-        -device ide-hd,drive=sata_disk,bus=ahci.0
-
+        \
+        -drive file=$(TARGET_DISK_1),format=raw,id=disk1,if=none \
+        -device ide-hd,drive=disk1,bus=ahci.0 \
+        \
+        -drive file=$(TARGET_DISK_2),format=raw,id=disk2,if=none \
+        -device ide-hd,drive=disk2,bus=ahci.1
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run clean disk_random disk_msg
+.PHONY: all run clean disk_random disk_msg_1 disk_msg_2

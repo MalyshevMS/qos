@@ -76,6 +76,8 @@ namespace Driver::PCI {
                 }
             }
         }
+
+        kinfo(fmt("PCI: Total devices: {}", device_count));
     }
 
     PCIDevice* find_device(uint8_t class_code, uint8_t subclass) {
@@ -96,6 +98,14 @@ namespace Driver::PCI {
             }
         }
         return nullptr;
+    }
+
+    const PCIDevice* get_devices() {
+        return devices;
+    }
+
+    int get_device_count() {
+        return device_count;
     }
 
 } // namespace Driver::PCI
