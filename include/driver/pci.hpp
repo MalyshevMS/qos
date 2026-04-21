@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <klib/string.hpp>
 
 namespace Driver {
 namespace PCI {
@@ -29,5 +30,6 @@ namespace PCI {
 
     const PCIDevice* get_devices();
     int get_device_count();
+    kstd::string get_class_name(uint8_t class_code);
 }; // namespace PCI
 }; // namespace Driver

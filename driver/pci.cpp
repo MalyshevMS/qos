@@ -9,7 +9,7 @@ namespace Driver::PCI {
     using namespace Ports;
     using namespace kstd;
 
-    static PCIDevice devices[32];
+    static PCIDevice devices[64];
     static int device_count = 0;
 
     uint32_t read_dword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
@@ -49,6 +49,11 @@ namespace Driver::PCI {
         dev.class_code = (reg8 >> 24) & 0xFF;
         dev.subclass   = (reg8 >> 16) & 0xFF;
         dev.prog_if    = (reg8 >> 8) & 0xFF;
+
+        uint32_t reg3C = read_dword(bus, device, function, 0x3C);
+        dev.interrupt_line = reg3C & 0xFF;
+
+        kinfo(fmt("INTERRUPT LINE: %x", dev.interrupt_line));
 
         for (int i = 0; i < 6; i++) {
             dev.bar[i] = read_dword(bus, device, function, 0x10 + (i * 4));
@@ -106,6 +111,18 @@ namespace Driver::PCI {
 
     int get_device_count() {
         return device_count;
+    }
+
+    string get_class_name(uint8_t class_code) {
+        switch (class_code) {
+            case 0x01: return "Storage";
+            case 0x02: return "Network";
+            case 0x03: return "Display";
+            case 0x04: return "Multimedia";
+            case 0x06: return "Bridge";
+            case 0x0C: return "Serial Bus";
+            default:   return "Unknown";
+        }
     }
 
 } // namespace Driver::PCI

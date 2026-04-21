@@ -25,6 +25,7 @@ driver/timer.cpp \
 driver/keyboard.cpp \
 driver/disk.cpp \
 driver/sata.cpp \
+driver/usb.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
 klib/string.cpp
@@ -110,12 +111,13 @@ run: $(TARGET_ISO) $(TARGET_DISK_1) $(TARGET_DISK_2)
         -enable-kvm \
         -serial stdio \
         -device ahci,id=ahci \
+		-device usb-ehci,id=ehci \
         \
         -drive file=$(TARGET_DISK_1),format=raw,id=disk1,if=none \
         -device ide-hd,drive=disk1,bus=ahci.0 \
         \
-        -drive file=$(TARGET_DISK_2),format=raw,id=disk2,if=none \
-        -device ide-hd,drive=disk2,bus=ahci.1
+        -drive file=$(TARGET_DISK_2),format=raw,id=usb_disk,if=none \
+        -device usb-storage,drive=usb_disk,bus=ehci.0
 clean:
 	rm -rf $(BUILD_DIR)
 

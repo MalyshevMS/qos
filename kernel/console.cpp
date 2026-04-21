@@ -85,7 +85,8 @@ namespace Kernel::Console {
 
         for (int i = 0; i < count; i++) {
             auto& dev = devs[i];
-            kprintln(fmt("ID:%x:%x Class:%x Sub:%x", dev.vendor_id, dev.device_id, dev.class_code, dev.subclass));
+            auto classname = PCI::get_class_name(dev.class_code);
+            kprintln(fmt("ID:%x:%x Class:%x Sub:%x - {}", dev.vendor_id, dev.device_id, dev.class_code, dev.subclass, classname));
         }
     }
 
