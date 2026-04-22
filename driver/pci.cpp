@@ -53,8 +53,6 @@ namespace Driver::PCI {
         uint32_t reg3C = read_dword(bus, device, function, 0x3C);
         dev.interrupt_line = reg3C & 0xFF;
 
-        kinfo(fmt("INTERRUPT LINE: %x", dev.interrupt_line));
-
         for (int i = 0; i < 6; i++) {
             dev.bar[i] = read_dword(bus, device, function, 0x10 + (i * 4));
         }

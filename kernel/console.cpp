@@ -183,7 +183,7 @@ namespace Kernel::Console {
     void divz() {
         kprintln("Testing division by zero (for int32_t)...");
         auto zero = 0;
-        auto res = 1234 / zero;
+        auto res = 4171 / zero;
         kprintln(fmt("{}", res));
     }
 
@@ -217,6 +217,8 @@ namespace Kernel::Console {
         }
         kprintln("] Done.");
 
+        // int b = 0;
+        // int c = a 
         kprint("Installing RedHat CyberWeapon [..............................]");
         kprint("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (int i = 0; i < 30; i++) {
@@ -232,7 +234,7 @@ namespace Kernel::Console {
             Timer::sleep(250);
         }
         kprintln("] Done.");
-        kprint("Big brother is wathing you.");
+        kprint("Big brother is watching you.");
 
         INT_DISABLE;
         CPU_HALT;
