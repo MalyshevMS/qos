@@ -3,6 +3,7 @@
 #include <kernel/serial.hpp>
 #include <kernel/power.hpp>
 #include <kernel/vconsole.hpp>
+#include <kernel/task.hpp>
 #include <driver/keyboard.hpp>
 #include <driver/pci.hpp>
 #include <driver/disk.hpp>
@@ -77,6 +78,17 @@ namespace Kernel::Console {
         } else {
             kprintln(args);
         }
+    }
+
+    void runtask() {
+        auto task = [](){
+            while (1) {
+                kprintln("Hello from idle task!");
+                Timer::sleep(5000);
+            }
+        };
+
+        Multitask::create_task(task);
     }
 
     void lspci() {
@@ -292,6 +304,8 @@ namespace Kernel::Console {
             tickp();
         } else if (cmd == "ctsc") {
             ctsc();
+        } else if (cmd == "runtask") {
+            runtask();
         } else if (cmd == "systemd") {
             systemd();
         } else if (cmd == "poweroff" || cmd == "exit") {

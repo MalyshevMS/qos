@@ -31,7 +31,7 @@ irq_common_stub:
 
     push esp
     call irq_common_handler
-    add esp, 4
+    mov esp, eax
 
     pop eax
     mov ds, ax

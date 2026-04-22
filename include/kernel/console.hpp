@@ -14,7 +14,6 @@ namespace Console {
     void clear();
     void echo(const kstd::string& args);
     void info();
-    void exit();
     
 } // namespace Console
 } // namespace Kernel

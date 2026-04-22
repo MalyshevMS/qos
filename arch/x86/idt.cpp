@@ -1,6 +1,7 @@
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
 #include <kernel/vconsole.hpp>
+#include <kernel/task.hpp>
 
 namespace Arch::x86 {
 
@@ -31,12 +32,22 @@ void exception_register_handler(int n, handler_t handler) {
     if (n < 32) exception_handlers[n] = handler;
 }
 
-extern "C" void irq_common_handler(Registers* regs) {
+extern "C" uint32_t irq_common_handler(Registers* regs) {
     int irq = regs->int_no - 32;
 
-    if (irq_handlers[irq] != nullptr) irq_handlers[irq](regs);
+    if (irq_handlers[irq] != nullptr) {
+        irq_handlers[irq](regs);
+    }
+
+    uint32_t result_esp = (uint32_t)regs;
+
+    if (irq == 0) {
+        result_esp = Multitask::schedule(result_esp);
+    }
 
     pic_send_eoi(irq);
+    
+    return result_esp;
 }
 
 extern "C" void exception_common_handler(Registers* regs) {

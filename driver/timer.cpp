@@ -31,10 +31,10 @@ namespace Driver::Timer {
     static uint64_t cpu_freq = 0;
 
     void timer_callback(x86::Registers *regs) {
-        memcpy(registers, regs, sizeof(x86::Registers));
+        // memcpy(registers, regs, sizeof(x86::Registers));
         ticks++;
 
-        EOI_MASTER;
+        // EOI_MASTER;
     }
 
     const x86::Registers* get_last_registers() {

@@ -7,6 +7,7 @@
 #include <kernel/console.hpp>
 #include <kernel/power.hpp>
 #include <kernel/vconsole.hpp>
+#include <kernel/task.hpp>
 
 #include <driver/keyboard.hpp>
 #include <driver/timer.hpp>
@@ -44,6 +45,7 @@ void kernel_main() {
     x86::idt_init();
     PCI::init();
     Disk::init();
+    Multitask::init();
     
     x86::irq_register_handler(0, (x86::handler_t)&Timer::timer_callback);
     x86::pic_unmask_irq(0);
