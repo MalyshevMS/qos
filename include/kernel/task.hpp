@@ -14,13 +14,13 @@ namespace Kernel::Multitask {
         uint32_t esp;             // Stack pointer
         uint32_t* stack_base;     // Allocated stack base
         TaskStatus status;        // Current task status
-        kstd::string name;         // Task name for debugging
+        const char* name;         // Task name for debugging
         Task* next;               // Next task in circular list
         Task* prev;               // Previous task for easier removal
     };
 
     void init();
-    uint32_t create_task(void (*entry_point)(), kstd::string name = "task");
+    uint32_t create_task(void (*entry_point)(), const char* name = "task");
     uint32_t schedule(uint32_t current_esp);
     
     bool kill_task(uint32_t task_id);

@@ -94,7 +94,7 @@ namespace Kernel::Multitask {
         return current_task->esp;
     }
 
-    uint32_t create_task(void (*entry_point)(), string name) {
+    uint32_t create_task(void (*entry_point)(), const char* name) {
         Task* new_task = (Task*)malloc(sizeof(Task));
         if (new_task == nullptr) {
             kpanic("Failed to allocate task structure");
@@ -132,7 +132,7 @@ namespace Kernel::Multitask {
         new_task->esp = (uint32_t)ptr;
         new_task->stack_base = stack;
         new_task->status = TASK_RUNNING;
-        new_task->name = name.c_str() ? name : "unnamed";
+        new_task->name = name ? name : "unnamed";
         new_task->next = new_task;
         new_task->prev = new_task;
 
@@ -148,7 +148,7 @@ namespace Kernel::Multitask {
             current_task->next = new_task;
         }
 
-        kinfo(fmt("Created task {} ('{}') with stack at %x", new_task->id, name.c_str(), (uint32_t)stack));
+        kinfo(fmt("Created task {} ('{}') with stack at %x", new_task->id, name, (uint32_t)stack));
         return new_task->id;
     }
 
@@ -211,7 +211,6 @@ namespace Kernel::Multitask {
 
         Task* task = current_task;
         int count = 0;
-        kprintln("=== Task List ===");
         
         do {
             const char* status_str = "RUNNING";
@@ -219,12 +218,10 @@ namespace Kernel::Multitask {
             else if (task->status == TASK_TERMINATED) status_str = "TERMINATED";
             
             string marker = (task == current_task) ? " <-- current" : "";
-            kprintln(fmt("[{}] '{}' (id={}, esp=%x, status={}){}", count++, task->name.c_str(), task->id, task->esp, status_str, marker));
+            kprintln(fmt("[{}] '{}' (id={}, esp=%x, status={}){}", count++, task->name, task->id, task->esp, status_str, marker));
             
             task = task->next;
         } while (task != current_task);
-        
-        kprintln("=== End Task List ===");
     }
 
 }; // namespace Kernel::Multitask

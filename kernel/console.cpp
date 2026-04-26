@@ -211,12 +211,14 @@ namespace Kernel::Console {
 
     void runtask() {
         auto task = [](){
-            kprintln("Some big work started...");
-            Timer::sleep(10'000);
-            kprintln("Some big work ended.");
+            int c = 0;
+            while (1) {
+                Serial::println(fmt("[{}] running task...", c++));
+                Timer::sleep(500);
+            }
         };
 
-        Multitask::create_task(task);
+        Multitask::create_task(task, "runtask");
     }
 
     void kill(const string& args) {
@@ -232,7 +234,7 @@ namespace Kernel::Console {
         }
 
         if (Multitask::kill_task(id)) {
-            kinfo(fmt("Task %u marked for termination", id));
+            kinfo(fmt("Task {} marked for termination", id));
         } else {
             kwarn(fmt("Failed to kill task {} (not found or cannot kill)", id));
         }
@@ -270,7 +272,7 @@ namespace Kernel::Console {
         }
 
         if (Multitask::resume_task(id)) {
-            kinfo(fmt("Task %u resumed", id));
+            kinfo(fmt("Task {} resumed", id));
         } else {
             kwarn(fmt("Failed to resume task {} (not found or not paused)", id));
         }
