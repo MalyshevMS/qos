@@ -67,10 +67,5 @@ void kernel_main() {
     Console::init();
     Console::run();
 
-    kwarn("You shouldn't have reach this far. Hanging...");
-    
-    while (1) {
-        CPU_HALT;
-        SHOW_CPU_HALT;
-    }
+    for (;;) CPU_HALT;
 }

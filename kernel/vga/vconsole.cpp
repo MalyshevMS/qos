@@ -5,7 +5,7 @@
 #include <cfg/cfg.txx>
 #include <cfg/asm.txx>
 #include <cfg/flags.txx>
-
+#include <kernel/power.hpp>
 
 namespace Kernel {
 
@@ -280,6 +280,10 @@ namespace Kernel {
         kcprint("<==== end trace ====>", col);
         Serial::println(ANSI_CLEAR);
 
+        kwarn("DEBUG: powering off after panic...");
+        Hardware::poweroff();
+
+        // Shouldn't reach this far
         SHOW_CPU_HALT;
         for (;;) CPU_HALT;
     }
