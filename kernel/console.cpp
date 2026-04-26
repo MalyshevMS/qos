@@ -65,6 +65,12 @@ namespace Kernel::Console {
         kprintln("    divz - cause kernel panic (divide int32 by zero)");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
+        kprintln("    === Task Management ===");
+        kprintln("    tasks - list all tasks");
+        kprintln("    create [type] - create new task (finite/infinite, default: finite)");
+        kprintln("    kill <id> - terminate task with ID");
+        kprintln("    pause <id> - pause task with ID");
+        kprintln("    resume <id> - resume paused task with ID");
     }
 
     void clear() {
@@ -78,17 +84,6 @@ namespace Kernel::Console {
         } else {
             kprintln(args);
         }
-    }
-
-    void runtask() {
-        auto task = [](){
-            while (1) {
-                kprintln("Hello from idle task!");
-                Timer::sleep(5000);
-            }
-        };
-
-        Multitask::create_task(task);
     }
 
     void lspci() {
@@ -199,6 +194,88 @@ namespace Kernel::Console {
         kprintln(fmt("{}", res));
     }
 
+    static uint32_t parse_task_id(const string& args) {
+        uint32_t id = 0;
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i] < '0' || args[i] > '9') {
+                return -1U; // Invalid
+            }
+            id = id * 10 + (args[i] - '0');
+        }
+        return id;
+    }
+
+    void tasks() {
+        Multitask::list_tasks();
+    }
+
+    void runtask() {
+        auto task = [](){
+            kprintln("Some big work started...");
+            Timer::sleep(10'000);
+            kprintln("Some big work ended.");
+        };
+
+        Multitask::create_task(task);
+    }
+
+    void kill(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: kill <task_id>");
+            return;
+        }
+
+        uint32_t id = parse_task_id(args);
+        if (id == -1U) {
+            kwarn(fmt("Invalid task ID: {}", args));
+            return;
+        }
+
+        if (Multitask::kill_task(id)) {
+            kinfo(fmt("Task %u marked for termination", id));
+        } else {
+            kwarn(fmt("Failed to kill task {} (not found or cannot kill)", id));
+        }
+    }
+
+    void pause(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: pause <task_id>");
+            return;
+        }
+
+        uint32_t id = parse_task_id(args);
+        if (id == -1U) {
+            kwarn(fmt("Invalid task ID: {}", args));
+            return;
+        }
+
+        if (Multitask::pause_task(id)) {
+            kinfo(fmt("Task {} paused", id));
+        } else {
+            kwarn(fmt("Failed to pause task {} (not found)", id));
+        }
+    }
+
+    void resume(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: resume <task_id>");
+            return;
+        }
+
+        uint32_t id = parse_task_id(args);
+        if (id == -1U) {
+            kwarn(fmt("Invalid task ID: {}", args));
+            return;
+        }
+
+        if (Multitask::resume_task(id)) {
+            kinfo(fmt("Task %u resumed", id));
+        } else {
+            kwarn(fmt("Failed to resume task {} (not found or not paused)", id));
+        }
+    }
+
     void systemd() {
         kcolor(0x1F);
         clear();
@@ -304,10 +381,18 @@ namespace Kernel::Console {
             tickp();
         } else if (cmd == "ctsc") {
             ctsc();
-        } else if (cmd == "runtask") {
-            runtask();
         } else if (cmd == "systemd") {
             systemd();
+        } else if (cmd == "tasks") {
+            tasks();
+        } else if (cmd == "runtask") {
+            runtask();
+        } else if (cmd == "kill") {
+            kill(args);
+        } else if (cmd == "pause") {
+            pause(args);
+        } else if (cmd == "resume") {
+            resume(args);
         } else if (cmd == "poweroff" || cmd == "exit") {
             Hardware::poweroff();
             kprintln("If you see this message, your ACPI controller is broken");
