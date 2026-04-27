@@ -92,47 +92,46 @@ namespace Kernel::Multitask {
             next = next->next;
         }
 
+        x86::tss_entry.esp0 = current_task->kstack_top;
+
         // Fallback: just use current task (shouldn't happen)
         return current_task->esp;
     }
 
-    uint32_t create_task(void (*entry_point)(), const char* name) {
+    uint32_t create_task(void (*entry_point)(), const char* name, bool user) {
         Task* new_task = (Task*)malloc(sizeof(Task));
-        if (new_task == nullptr) {
-            kpanic("Failed to allocate task structure");
-            return 0;
+
+        uint32_t* kstack = (uint32_t*)malloc(TASK_STACK_SIZE);
+        new_task->kernel_stack = kstack;
+        new_task->kstack_top = (uint32_t)kstack + TASK_STACK_SIZE;
+        new_task->is_user = user;
+
+        uint32_t* ustack = (uint32_t*)malloc(TASK_STACK_SIZE);
+        new_task->stack_base = ustack;
+        uint32_t* ptr = (uint32_t*)((uint32_t)ustack + TASK_STACK_SIZE);
+
+        if (user) {
+            *(--ptr) = 0x23;                // SS (user)
+            *(--ptr) = (uint32_t)ptr + 4;   // ESP (user)
+            *(--ptr) = 0x202;               // EFLAGS
+            *(--ptr) = 0x1B;                // CS (user)
+            *(--ptr) = (uint32_t)entry_point;
+        } else {
+            *(--ptr) = 0x202;               //  EFLAGS
+            *(--ptr) = 0x08;                // Kernel Code
+            *(--ptr) = (uint32_t)entry_point;
         }
 
-        uint32_t* stack = (uint32_t*)malloc(TASK_STACK_SIZE);
-        if (stack == nullptr) {
-            free(new_task);
-            kpanic("Failed to allocate task stack");
-            return 0;
-        }
+        *(--ptr) = 0; // err_code
+        *(--ptr) = 32; // int_no
+        for (int i = 0; i < 8; i++) *(--ptr) = 0; // pusha
 
-        // Calculate stack pointer
-        uint32_t* ptr = (uint32_t*)((uint32_t)stack + TASK_STACK_SIZE);
-        
-        // Return address for the task function (will be on stack after iret)
-        *(--ptr) = (uint32_t)&task_exit;  // Return address when task function returns
+        // DS
+        *(--ptr) = user ? 0x23 : 0x10;
 
-        // Set up interrupt frame for iret
-        *(--ptr) = 0x202;           // EFLAGS (interrupts enabled)
-        *(--ptr) = 0x08;            // CS
-        *(--ptr) = (uint32_t)entry_point;  // EIP - entry point
-
-        // Exception/IRQ frame fields
-        *(--ptr) = 0;               // err_code
-        *(--ptr) = 32;              // int_no
-
-        // General purpose registers (will be popped by popa in irq_handler)
-        for (int i = 0; i < 8; i++) *(--ptr) = 0;
-
-        *(--ptr) = 0x10;            // ds
+        new_task->esp = (uint32_t)ptr;
 
         new_task->id = task_id_counter++;
-        new_task->esp = (uint32_t)ptr;
-        new_task->stack_base = stack;
         new_task->status = TASK_RUNNING;
         new_task->name = name ? name : "unnamed";
         new_task->next = new_task;
@@ -150,7 +149,8 @@ namespace Kernel::Multitask {
             current_task->next = new_task;
         }
 
-        kinfo(fmt("Created task {} ('{}') with stack at %x", new_task->id, name, (uint32_t)stack));
+        kinfo(fmt("Created task {} ('{}') with kstack at %x, ustack at %x", new_task->id, name, (uint32_t)kstack, (uint32_t)ustack));
+
         return new_task->id;
     }
 

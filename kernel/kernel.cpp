@@ -16,6 +16,7 @@
 #include <driver/disk.hpp>
 
 #include <arch/x86/gdt.hpp>
+#include <arch/x86/tss.hpp>
 #include <arch/x86/idt.hpp>
 #include <arch/x86/pic.hpp>
 #include <arch/x86/exceptions.hpp>
@@ -31,9 +32,10 @@ using namespace kstd;
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
 
-void user_test() {
+void user_mode_test() {
+    // It's Ring 3 function, you can't do anything.
     while(1) {
-        // do nothing for the first time
+        // do nothing
     }
 }
 
@@ -54,7 +56,7 @@ void kernel_main() {
     PCI::init();
     Disk::init();
     Multitask::init();
-    
+
     x86::irq_register_handler(0, (x86::handler_t)&Timer::timer_callback);
     x86::pic_unmask_irq(0);
 
@@ -69,17 +71,21 @@ void kernel_main() {
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
 
+    // Initialize kernel stack
+    static uint8_t initial_kstack[4096];
+    x86::tss_entry.esp0 = (uint32_t)initial_kstack + 4096;
+    x86::tss_entry.ss0 = 0x10;
+
     INT_ENABLE;
     SHOW_INT_ENABLE;
+    
+    kinfo("Jumping to user mode...");
 
-    // Console::init();
-    // Console::run();
+    uint32_t* user_stack_base = (uint32_t*)malloc(4096);
+    uint32_t user_stack_top = (uint32_t)user_stack_base + 4096;
 
-    uint32_t* user_stack = (uint32_t*)malloc(4096) + 1024;
-    jump_to_user((uint32_t)user_test, (uint32_t)user_stack);
+    jump_to_user((uint32_t)user_mode_test, user_stack_top);
 
-    for (int i = 0;;i++) {
-        Serial::println(fmt("[{}] I'm alive.", i));
-        Timer::sleep(1'000);
-    }
+    // Shouldn't be reached
+    for (;;) CPU_HALT;
 }
