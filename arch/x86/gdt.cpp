@@ -2,7 +2,7 @@
 
 namespace Arch::x86 {
 
-static GDTEntry gdt[3];
+static GDTEntry gdt[6];
 static GDTPointer gdt_ptr;
 
 extern "C" void gdt_load(uint32_t);
@@ -26,11 +26,20 @@ void gdt_init() {
     // Null descriptor
     gdt_set_entry(0, 0, 0, 0, 0);
 
-    // Code segment
+    // Kernel Code segment
     gdt_set_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
 
-    // Data segment
+    // Kernel Data segment
     gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
+
+    // User Code segment
+    gdt_set_entry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);
+
+    // User Data segment
+    gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
+
+    // TSS (not implemented yet)
+    gdt_set_entry(5, 0, 0, 0, 0);
 
     gdt_load((uint32_t)&gdt_ptr);
 }

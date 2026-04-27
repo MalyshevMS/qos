@@ -19,4 +19,12 @@ namespace Arch::x86 {
     } PACK;
 
     void gdt_init();
+
+    enum GDTSelectors {
+        KCODE = 0x08,
+        KDATA = 0x10,
+        UCODE = 0x18 | 3,
+        UDATA = 0x20 | 3,
+        TSS = 0x28
+    };
 } // namespace Arch::x86
