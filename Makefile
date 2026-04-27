@@ -33,6 +33,7 @@ klib/string.cpp
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
 arch/x86/gdt_load.asm \
+arch/x86/tss.asm \
 arch/x86/irq_handler.asm \
 arch/x86/exception_handler.asm \
 arch/x86/multiboot_header.asm

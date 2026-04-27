@@ -1,7 +1,7 @@
 #include <klib/mem.hpp>
 
 void kstd::memcpy(void* dest, const void* source, size_t n) {
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     ((char*)dest)[i] = ((const char*)source)[i];
 }
 
@@ -18,4 +18,10 @@ int kstd::memcmp(const void* s1, const void* s2, size_t n) {
     }
 
     return 0;
+}
+
+void* kstd::memset(void* ptr, char value, size_t n) {
+    for (size_t i = 0; i < n; i++)
+    ((char*)ptr)[i] = value;
+    return ptr;
 }

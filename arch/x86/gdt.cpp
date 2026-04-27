@@ -1,11 +1,17 @@
 #include <arch/x86/gdt.hpp>
+#include <arch/x86/tss.hpp>
+#include <klib/mem.hpp>
 
 namespace Arch::x86 {
 
+using namespace kstd;
+
 static GDTEntry gdt[6];
 static GDTPointer gdt_ptr;
+TSSEntry tss_entry;
 
 extern "C" void gdt_load(uint32_t);
+extern "C" void tss_load();
 
 static void gdt_set_entry(int num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran) {
     gdt[num].base_low = base & 0xFFFF;
@@ -20,7 +26,7 @@ static void gdt_set_entry(int num, uint32_t base, uint32_t limit, uint8_t access
 }
 
 void gdt_init() {
-    gdt_ptr.limit = sizeof(GDTEntry) * 3 - 1;
+    gdt_ptr.limit = sizeof(GDTEntry) * 6 - 1;
     gdt_ptr.base = (uint32_t)&gdt;
 
     // Null descriptor
@@ -38,10 +44,20 @@ void gdt_init() {
     // User Data segment
     gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
 
-    // TSS (not implemented yet)
-    gdt_set_entry(5, 0, 0, 0, 0);
+    uint32_t tss_base = (uint32_t)&tss_entry;
+    uint32_t tss_limit = sizeof(TSSEntry) - 1;
+
+    memset(&tss_entry, 0, sizeof(TSSEntry));
+
+    tss_entry.ss0 = 0x10;
+    tss_entry.esp0 = 0;
+    tss_entry.iomap_base = sizeof(TSSEntry);
+
+    // TSS
+    gdt_set_entry(5, tss_base, tss_limit, 0x89, 0x40);
 
     gdt_load((uint32_t)&gdt_ptr);
+    tss_load();
 }
 
 } // namespace Arch::x86
