@@ -28,7 +28,8 @@ driver/disk.cpp \
 driver/sata.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
-klib/string.cpp
+klib/string.cpp \
+klib/conv.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
@@ -36,7 +37,7 @@ arch/x86/gdt_load.asm \
 arch/x86/tss.asm \
 arch/x86/irq_handler.asm \
 arch/x86/exception_handler.asm \
-arch/x86/switch_to_user.asm \
+arch/x86/jump_to_user.asm \
 arch/x86/multiboot_header.asm
 
 # Script

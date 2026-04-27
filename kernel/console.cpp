@@ -4,15 +4,21 @@
 #include <kernel/power.hpp>
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
+#include <kernel/memory.hpp>
 #include <driver/keyboard.hpp>
 #include <driver/pci.hpp>
 #include <driver/disk.hpp>
 #include <driver/timer.hpp>
+#include <klib/conv.hpp>
 
-using namespace kstd;
-using namespace Driver;
+extern "C" void jump_to_user(uint32_t, uint32_t);
 
 namespace Kernel::Console {
+
+    using namespace kstd;
+    using namespace Driver;
+    using namespace Mem;
+
     static bool running = true;
     static string prompt;
     static int prompt_y;
@@ -51,22 +57,16 @@ namespace Kernel::Console {
         kprintln("    kinfo/kdebug/kwarn/kpanic - simulate selected kernel function");
         kprintln("    watch - watch command output every second, press Ctrl+C to exit");
         kprintln("    info - system info");
-        kprintln("    tickp - show tick period (in femtoseconds)");
-        kprintln("    freq - show CPU frequency, calibrated at boot (Hz and MHz)");
-        kprintln("    ctsc - show current CPU frequency (recalibrates TSC)");
-        kprintln("    uptime - get machine uptime (in milliseconds)");
         kprintln("    lspci - list PCI devices");
         kprintln("    satainfo - list SATA devices");
         kprintln("    rfs <device> - read first sector from SATA device");
-        kprintln("    sleep - wait for 5 seconds");
-        kprintln("    divz - cause kernel panic (divide int32 by zero)");
+        kprintln("    sleep <amount> - wait for milliseconds");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
         kprintln("    tasks - list all tasks");
         kprintln("    runtask - run simple task (infinitly print to serial with counter)");
-        kprintln("    kill <id> - terminate task with ID");
-        kprintln("    pause <id> - pause task with ID");
-        kprintln("    resume <id> - resume paused task with ID");
+        kprintln("    kill/pause/resume <id> - manipulate task with ID");
+        kprintln("    jmp - jump to user mode. the only way to return back is rebooting physicaly");
     }
 
     void clear() {
@@ -101,23 +101,13 @@ namespace Kernel::Console {
             uint8_t port;
             uint32_t sig;
             if (Disk::get_device_info(i, port, sig)) {
-                kprintln(fmt("  [{}] Port {} Signature %x", i, port, sig));
+                kprintln(fmt("[{}] Port {} Signature %x", i, port, sig));
             }
         }
     }
 
     void rfs(const string& args) {
-        int device_index = 0;
-        if (!args.empty()) {
-            device_index = 0;
-            for (size_t i = 0; i < args.size(); i++) {
-                if (args[i] < '0' || args[i] > '9') {
-                    kprintln("Invalid device index.");
-                    return;
-                }
-                device_index = device_index * 10 + (args[i] - '0');
-            }
-        }
+        int device_index = to_uint32(args);
 
         int count = Disk::device_count();
         if (count == 0) {
@@ -150,55 +140,24 @@ namespace Kernel::Console {
         delete[] buffer;
     }
 
-    void sleep() {
-        kprintln("Sleeping for 5 seconds");
-        Timer::sleep(5000);
+    void sleep(const string& args) {
+        unsigned int ms = to_uint32(args);
+        kprintln(fmt("Sleeping for {}ms", ms));
+        Timer::sleep(ms);
         kprintln("Wake up!");
     }
 
-    void uptime() {
-        kprintln(fmt("Uptime: {} milliseconds", Timer::ktime_ms()));
-    }
-
-    void freq() {
-        auto freq = Timer::frequency();
-        kprintln(fmt("CPU Frequency (calibrated at boot): {} MHz ({} Hz)", freq / 1'000'000, freq));
-    }
-
-    void tickp() {
-        kprintln(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
-    }
-
-    void ctsc() {
-        auto freq = Timer::calibrate_tsc();
-        kprintln(fmt("CPU frequency (current): {} MHz ({} Hz)", freq / 1'000'000, freq));
-    }
-
     void info() {
+        auto freq_boot = Timer::frequency();
+        auto freq_current = Timer::calibrate_tsc();
+
         kprintln("=== System info ===");
         kprintln("Arch: x86");
-        kprintln("Resolution: 80x25 (VGA)");
-        freq();
-        ctsc();
-        uptime();
-    }
-
-    void divz() {
-        kprintln("Testing division by zero (for int32_t)...");
-        auto zero = 0;
-        auto res = 4171 / zero;
-        kprintln(fmt("{}", res));
-    }
-
-    static uint32_t parse_task_id(const string& args) {
-        uint32_t id = 0;
-        for (size_t i = 0; i < args.size(); i++) {
-            if (args[i] < '0' || args[i] > '9') {
-                return -1U; // Invalid
-            }
-            id = id * 10 + (args[i] - '0');
-        }
-        return id;
+        kprintln("Resolution: 80x25 (VGA)");        
+        kprintln(fmt("Uptime: {} milliseconds", Timer::ktime_ms()));
+        kprintln(fmt("Tick period: {} femtoseconds", Timer::tick_period()));
+        kprintln(fmt("CPU Frequency (calibrated at boot): {} MHz ({} Hz)", freq_boot / 1'000'000, freq_boot));
+        kprintln(fmt("CPU frequency (current): {} MHz ({} Hz)", freq_current / 1'000'000, freq_current));
     }
 
     void tasks() {
@@ -223,7 +182,7 @@ namespace Kernel::Console {
             return;
         }
 
-        uint32_t id = parse_task_id(args);
+        uint32_t id = to_uint32(args);
         if (id == -1U) {
             kwarn(fmt("Invalid task ID: {}", args));
             return;
@@ -242,7 +201,7 @@ namespace Kernel::Console {
             return;
         }
 
-        uint32_t id = parse_task_id(args);
+        uint32_t id = to_uint32(args);
         if (id == -1U) {
             kwarn(fmt("Invalid task ID: {}", args));
             return;
@@ -261,7 +220,7 @@ namespace Kernel::Console {
             return;
         }
 
-        uint32_t id = parse_task_id(args);
+        uint32_t id = to_uint32(args);
         if (id == -1U) {
             kwarn(fmt("Invalid task ID: {}", args));
             return;
@@ -272,6 +231,23 @@ namespace Kernel::Console {
         } else {
             kwarn(fmt("Failed to resume task {} (not found or not paused)", id));
         }
+    }
+
+    void user_mode_test() {
+        // It's Ring 3 function, you can't do anything.
+        while (1) {
+            // do nothing
+        }
+    }
+
+    void jmp() {
+        kinfo("Jumping to user mode...");
+        kwarn("You can't return to kernel console from this point.");
+
+        uint32_t* user_stack_base = (uint32_t*)malloc(4096);
+        uint32_t user_stack_top = (uint32_t)user_stack_base + 4096;
+
+        jump_to_user((uint32_t)user_mode_test, user_stack_top);
     }
 
     void systemd() {
@@ -366,19 +342,9 @@ namespace Kernel::Console {
         } else if (cmd == "rfs") {
             rfs(args);
         } else if (cmd == "sleep") {
-            sleep();
-        } else if (cmd == "divz") {
-            divz();
-        } else if (cmd == "uptime") {
-            uptime();
+            sleep(args);
         } else if (cmd == "reboot") {
             Hardware::reboot();
-        } else if (cmd == "freq") {
-            freq();
-        } else if (cmd == "tickp") {
-            tickp();
-        } else if (cmd == "ctsc") {
-            ctsc();
         } else if (cmd == "systemd") {
             systemd();
         } else if (cmd == "tasks") {
@@ -391,6 +357,8 @@ namespace Kernel::Console {
             pause(args);
         } else if (cmd == "resume") {
             resume(args);
+        } else if (cmd == "jmp") {
+            jmp();
         } else if (cmd == "poweroff" || cmd == "exit") {
             Hardware::poweroff();
             kprintln("If you see this message, your ACPI controller is broken");

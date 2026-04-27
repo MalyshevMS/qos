@@ -32,13 +32,6 @@ using namespace kstd;
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
 
-void user_mode_test() {
-    // It's Ring 3 function, you can't do anything.
-    while(1) {
-        // do nothing
-    }
-}
-
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
@@ -79,12 +72,8 @@ void kernel_main() {
     INT_ENABLE;
     SHOW_INT_ENABLE;
     
-    kinfo("Jumping to user mode...");
-
-    uint32_t* user_stack_base = (uint32_t*)malloc(4096);
-    uint32_t user_stack_top = (uint32_t)user_stack_base + 4096;
-
-    jump_to_user((uint32_t)user_mode_test, user_stack_top);
+    Console::init();
+    Console::run();
 
     // Shouldn't be reached
     for (;;) CPU_HALT;
