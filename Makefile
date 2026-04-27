@@ -38,7 +38,9 @@ arch/x86/tss.asm \
 arch/x86/irq_handler.asm \
 arch/x86/exception_handler.asm \
 arch/x86/jump_to_user.asm \
-arch/x86/multiboot_header.asm
+arch/x86/syscall_stub.asm \
+arch/x86/multiboot_header.asm \
+kernel/user_mode_test.asm
 
 # Script
 OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))

@@ -2,6 +2,7 @@
 #include <arch/x86/pic.hpp>
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
+#include <klib/fmt.hpp>
 
 namespace Arch::x86 {
 
@@ -13,14 +14,15 @@ static handler_t irq_handlers[16] = {0};
 static handler_t exception_handlers[32] = {0};
 
 extern "C" void idt_load(uint32_t);
+extern "C" void syscall_stub();
 extern "C" uint32_t irq_stub_table[];
 extern "C" uint32_t exception_stub_table[];
 
-void idt_set_gate(int n, uint32_t handler) {
+void idt_set_gate(int n, uint32_t handler, uint8_t dpl) {
     idt[n].offset_low = handler & 0xFFFF;
     idt[n].selector = 0x08;
     idt[n].zero = 0;
-    idt[n].type_attr = 0x8E;
+    idt[n].type_attr = 0x8E | ((dpl & 3) << 5);
     idt[n].offset_high = (handler >> 16) & 0xFFFF;
 }
 
@@ -58,6 +60,10 @@ extern "C" void exception_common_handler(Registers* regs) {
     }
 }
 
+extern "C" void syscall_handler(Registers* regs) {
+    kinfo(kstd::fmt("EAX: {}", regs->eax));
+}
+
 void idt_init() {
     idt_ptr.limit = sizeof(IDTEntry) * 256 - 1;
     idt_ptr.base = (uint32_t)&idt;
@@ -73,6 +79,8 @@ void idt_init() {
     for (int i = 0; i < 16; i++) {
         idt_set_gate(32 + i, irq_stub_table[i]);
     }
+
+    idt_set_gate(0x80, (uint32_t)syscall_stub, 3);
 
     idt_load((uint32_t)&idt_ptr);
 }

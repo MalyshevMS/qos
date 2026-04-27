@@ -234,10 +234,15 @@ namespace Kernel::Console {
     }
 
     void user_mode_test() {
-        // It's Ring 3 function, you can't do anything.
-        while (1) {
-            // do nothing
-        }
+        asm volatile (
+            "movl $12, %%eax\n"
+            "int $0x80"
+            : 
+            :
+            : "eax"
+        );
+
+        for(;;);
     }
 
     void jmp() {

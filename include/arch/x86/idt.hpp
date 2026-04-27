@@ -28,7 +28,7 @@ namespace x86 {
     typedef void (*handler_t)(Registers*);
 
     void idt_init();
-    void idt_set_gate(int n, uint32_t handler);
+    void idt_set_gate(int n, uint32_t handler, uint8_t dpl = 0);
 
     void irq_register_handler(int irq, handler_t handler);
     void exception_register_handler(int n, handler_t handler);
