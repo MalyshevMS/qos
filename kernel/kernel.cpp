@@ -30,10 +30,11 @@ using namespace Driver;
 using namespace kstd;
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
-extern "C" void user_test();
 
-void int80h() {
-    kinfo("Hello from int 0x80!");
+void user_test() {
+    while(1) {
+        // do nothing for the first time
+    }
 }
 
 KERNEL_ENTRY
@@ -64,16 +65,13 @@ void kernel_main() {
     x86::exception_register_handler(0x06, (x86::handler_t)&x86::Exceptions::invalid_opcode);
     x86::exception_register_handler(0x08, (x86::handler_t)&x86::Exceptions::double_fault);
     x86::exception_register_handler(0x0D, (x86::handler_t)&x86::Exceptions::general_protection_fault);
-    
-    x86::exception_register_handler(0x80, (x86::handler_t)&int80h);
 
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
 
     INT_ENABLE;
     SHOW_INT_ENABLE;
-    
-    // Testing jump to user space, so we don't need console
+
     // Console::init();
     // Console::run();
 
