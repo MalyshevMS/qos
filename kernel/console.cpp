@@ -48,10 +48,7 @@ namespace Kernel::Console {
         kprintln("Available commands:");
         kprintln("    clear - clears screen");
         kprintln("    echo - outputs a string");
-        kprintln("    kinfo - simulate kinfo() - basic kernel info messages");
-        kprintln("    kdebug - simulate kdebug() - debug messages");
-        kprintln("    kwarn - simulate kwarn() - warnings");
-        kprintln("    kpanic - simulate kpanic() - kernel panic (will cause real panic)");
+        kprintln("    kinfo/kdebug/kwarn/kpanic - simulate selected kernel function");
         kprintln("    watch - watch command output every second, press Ctrl+C to exit");
         kprintln("    info - system info");
         kprintln("    tickp - show tick period (in femtoseconds)");
@@ -65,9 +62,8 @@ namespace Kernel::Console {
         kprintln("    divz - cause kernel panic (divide int32 by zero)");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
-        kprintln("    === Task Management ===");
         kprintln("    tasks - list all tasks");
-        kprintln("    create [type] - create new task (finite/infinite, default: finite)");
+        kprintln("    runtask - run simple task (infinitly print to serial with counter)");
         kprintln("    kill <id> - terminate task with ID");
         kprintln("    pause <id> - pause task with ID");
         kprintln("    resume <id> - resume paused task with ID");
