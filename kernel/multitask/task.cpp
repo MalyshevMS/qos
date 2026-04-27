@@ -25,7 +25,48 @@ namespace Kernel::Multitask {
     }
 
     void init() {
-        create_task(nullptr, "idle");
+        // Create initial idle task (kernel task with no entry point)
+        Task* idle_task = (Task*)malloc(sizeof(Task));
+        if (idle_task == nullptr) {
+            kpanic("Failed to allocate idle task");
+            return;
+        }
+
+        uint32_t* idle_stack = (uint32_t*)malloc(TASK_STACK_SIZE);
+        if (idle_stack == nullptr) {
+            free(idle_task);
+            kpanic("Failed to allocate idle stack");
+            return;
+        }
+
+        uint32_t* ptr = (uint32_t*)((uint32_t)idle_stack + TASK_STACK_SIZE);
+        
+        *(--ptr) = (uint32_t)&task_exit;
+        *(--ptr) = 0x202;           // EFLAGS
+        *(--ptr) = 0x08;            // CS (kernel)
+        *(--ptr) = 0;               // EIP - will loop indefinitely
+        *(--ptr) = 0;               // err_code
+        *(--ptr) = 32;              // int_no
+
+        for (int i = 0; i < 8; i++) *(--ptr) = 0;
+        *(--ptr) = 0x10;            // ds (kernel)
+
+        idle_task->id = task_id_counter++;
+        idle_task->esp = (uint32_t)ptr;
+        idle_task->stack_base = idle_stack;
+        idle_task->kernel_stack = nullptr;
+        idle_task->is_user = false;
+        idle_task->status = TASK_RUNNING;
+        idle_task->name = "idle";
+        idle_task->next = idle_task;
+        idle_task->prev = idle_task;
+        
+        current_task = idle_task;
+        
+        // Update TSS for first task
+        x86::tss_entry.esp0 = (uint32_t)idle_stack + TASK_STACK_SIZE;
+        
+        kinfo("Idle task initialized");
     }
 
     Task* find_task_by_id(uint32_t id) {
@@ -63,6 +104,9 @@ namespace Kernel::Multitask {
         if (task->stack_base != nullptr) {
             free(task->stack_base);
         }
+        if (task->kernel_stack != nullptr) {
+            free(task->kernel_stack);
+        }
         free(task);
     }
 
@@ -81,6 +125,17 @@ namespace Kernel::Multitask {
         while (attempts++ < max_attempts) {
             if (next->status == TASK_RUNNING) {
                 current_task = next;
+                
+                // Update esp0 in TSS for context switch
+                // esp0 should point to the top of kernel stack
+                if (current_task->is_user) {
+                    // For user tasks, use kernel stack
+                    x86::tss_entry.esp0 = (uint32_t)current_task->kernel_stack + TASK_STACK_SIZE;
+                } else {
+                    // For kernel tasks, use regular stack
+                    x86::tss_entry.esp0 = (uint32_t)current_task->stack_base + TASK_STACK_SIZE;
+                }
+                
                 return current_task->esp;
             } else if (next->status == TASK_TERMINATED) {
                 // Clean up terminated task, but continue searching
@@ -88,8 +143,10 @@ namespace Kernel::Multitask {
                 next = next->next;
                 cleanup_terminated_task(to_cleanup);
                 continue;
+            } else {
+                // Task is paused, skip to next
+                next = next->next;
             }
-            next = next->next;
         }
 
         // Fallback: just use current task (shouldn't happen)
@@ -110,16 +167,43 @@ namespace Kernel::Multitask {
             return 0;
         }
 
-        // Calculate stack pointer
+        // For user tasks, allocate a separate kernel stack
+        uint32_t* kernel_stack = nullptr;
+        bool is_user_task = (entry_point != nullptr); // nullptr entry point = idle task (kernel)
+        
+        if (is_user_task) {
+            kernel_stack = (uint32_t*)malloc(TASK_STACK_SIZE);
+            if (kernel_stack == nullptr) {
+                free(stack);
+                free(new_task);
+                kpanic("Failed to allocate kernel stack for user task");
+                return 0;
+            }
+        }
+
+        // Calculate stack pointer (stack grows downward)
         uint32_t* ptr = (uint32_t*)((uint32_t)stack + TASK_STACK_SIZE);
         
-        // Return address for the task function (will be on stack after iret)
-        *(--ptr) = (uint32_t)&task_exit;  // Return address when task function returns
-
         // Set up interrupt frame for iret
+        // When iret executes, stack order is: EIP, CS, EFLAGS, [ESP], [SS]
+        // We push in reverse order (using --ptr)
+        
+        if (is_user_task) {
+            // For user tasks transitioning from ring 0 to ring 3
+            // Stack order must be: [SS][ESP][EFLAGS][CS][EIP]
+            *(--ptr) = 0x23;            // ss (user data segment with RPL=3) - LAST item for iret
+            *(--ptr) = (uint32_t)stack + TASK_STACK_SIZE; // useresp (user stack top)
+        }
+        
         *(--ptr) = 0x202;           // EFLAGS (interrupts enabled)
-        *(--ptr) = 0x08;            // CS
-        *(--ptr) = (uint32_t)entry_point;  // EIP - entry point
+        
+        if (is_user_task) {
+            *(--ptr) = 0x1B;            // CS (user code segment with RPL=3)
+        } else {
+            *(--ptr) = 0x08;            // CS (kernel code segment)
+        }
+        
+        *(--ptr) = (uint32_t)entry_point;  // EIP - entry point - FIRST item for iret
 
         // Exception/IRQ frame fields
         *(--ptr) = 0;               // err_code
@@ -128,11 +212,17 @@ namespace Kernel::Multitask {
         // General purpose registers (will be popped by popa in irq_handler)
         for (int i = 0; i < 8; i++) *(--ptr) = 0;
 
-        *(--ptr) = 0x10;            // ds
+        if (is_user_task) {
+            *(--ptr) = 0x23;            // ds (user data segment with RPL=3)
+        } else {
+            *(--ptr) = 0x10;            // ds (kernel data segment)
+        }
 
         new_task->id = task_id_counter++;
         new_task->esp = (uint32_t)ptr;
         new_task->stack_base = stack;
+        new_task->kernel_stack = kernel_stack;
+        new_task->is_user = is_user_task;
         new_task->status = TASK_RUNNING;
         new_task->name = name ? name : "unnamed";
         new_task->next = new_task;
@@ -150,7 +240,8 @@ namespace Kernel::Multitask {
             current_task->next = new_task;
         }
 
-        kinfo(fmt("Created task {} ('{}') with stack at %x", new_task->id, name, (uint32_t)stack));
+        kinfo(fmt("Created task {} ('{}') {} with stack at %x, entry_point=%x, esp=%x", new_task->id, name, 
+                  is_user_task ? "USER" : "KERNEL", (uint32_t)stack, (uint32_t)entry_point, (uint32_t)ptr));
         return new_task->id;
     }
 

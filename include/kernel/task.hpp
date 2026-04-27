@@ -11,10 +11,12 @@ namespace Kernel::Multitask {
 
     struct Task {
         uint32_t id;              // Unique task ID
-        uint32_t esp;             // Stack pointer
+        uint32_t esp;             // Stack pointer (user or kernel)
         uint32_t* stack_base;     // Allocated stack base
+        uint32_t* kernel_stack;   // Kernel stack for user tasks
         TaskStatus status;        // Current task status
         const char* name;         // Task name for debugging
+        bool is_user;             // True if user task, false if kernel task
         Task* next;               // Next task in circular list
         Task* prev;               // Previous task for easier removal
     };
