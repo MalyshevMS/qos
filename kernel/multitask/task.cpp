@@ -1,3 +1,4 @@
+#include <arch/x86/tss.hpp>
 #include <kernel/task.hpp>
 #include <kernel/memory.hpp>
 #include <kernel/vconsole.hpp>
@@ -6,6 +7,7 @@
 #include <cfg/asm.txx>
 
 namespace Kernel::Multitask {
+    using namespace Arch;
     using namespace Mem;
     using namespace kstd;
 

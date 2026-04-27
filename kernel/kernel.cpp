@@ -29,6 +29,14 @@ using namespace Arch;
 using namespace Driver;
 using namespace kstd;
 
+extern "C" void jump_to_user(uint32_t, uint32_t);
+
+void user_test() {
+    while(1) {
+        // do nothing for the first time
+    }
+}
+
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
@@ -64,8 +72,14 @@ void kernel_main() {
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
-    Console::init();
-    Console::run();
+    // Console::init();
+    // Console::run();
 
-    for (;;) CPU_HALT;
+    uint32_t* user_stack = (uint32_t*)malloc(4096) + 1024;
+    jump_to_user((uint32_t)user_test, (uint32_t)user_stack);
+
+    for (int i = 0;;i++) {
+        Serial::println(fmt("[{}] I'm alive.", i));
+        Timer::sleep(1'000);
+    }
 }
