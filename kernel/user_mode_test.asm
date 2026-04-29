@@ -7,14 +7,15 @@ hello:
     int 0x80 ; Print "Hello, World!"
     ret
 
-    
+exit:
+    mov eax, 3
+    int 0x80 ; Exit
 
 user_mode_test:
     call hello
-
-    mov eax, 3
-    int 0x80 ; Exit
-    jmp $
+    
+    call exit
+    jmp $ ; Not necessary, but recomended
 
 text:
     db "Hello, World!", 10, 0

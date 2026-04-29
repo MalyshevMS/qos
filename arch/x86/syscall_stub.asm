@@ -7,16 +7,16 @@ syscall_stub:
     push 0x80
     pusha ; Save EDI, ESI, EBP, ESP, EBX, EDX, ECX, EAX
     
-    mov ax, ds ; Save DS
+    mov ax, ds
     push eax
 
     mov ax, 0x10 ; Load Kernel Data Segment
     mov ds, ax
     mov es, ax
 
-    push esp
+    push esp ; Pointer to struct Rgisters
     call syscall_handler
-    add esp, 4
+    mov esp, eax ; Reload stack (yet changes only on syscall 3)
 
     pop eax
     mov ds, ax

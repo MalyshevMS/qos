@@ -61,8 +61,9 @@ extern "C" void exception_common_handler(Registers* regs) {
     }
 }
 
-extern "C" void syscall_handler(Registers* regs) {
+extern "C" uint32_t syscall_handler(Registers* regs) {
     auto num = regs->eax;
+    uint32_t result_esp = (uint32_t)regs;
 
     if (num == 1) {
         kprint((const char*)regs->ebx);
@@ -74,10 +75,12 @@ extern "C" void syscall_handler(Registers* regs) {
 
         kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
 
-        // regs->esp = Multitask::schedule((uint32_t)regs); // TODO: make this
+        result_esp = Multitask::schedule((uint32_t)result_esp);
     } else {
         kwarn("Unknown syscall.");
     }
+
+    return result_esp;
 }
 
 void idt_init() {
