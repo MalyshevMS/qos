@@ -3,6 +3,7 @@
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
 #include <klib/fmt.hpp>
+#include <driver/timer.hpp>
 
 namespace Arch::x86 {
 
@@ -65,6 +66,15 @@ extern "C" void syscall_handler(Registers* regs) {
 
     if (num == 1) {
         kprint((const char*)regs->ebx);
+    } else if (num == 2) {
+        Driver::Timer::sleep(regs->ebx);
+    } else if (num == 3) {
+        auto task = Multitask::get_current_task_id();
+        Multitask::kill_task(task);
+
+        kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
+
+        // regs->esp = Multitask::schedule((uint32_t)regs); // TODO: make this
     } else {
         kwarn("Unknown syscall.");
     }

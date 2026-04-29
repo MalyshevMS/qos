@@ -237,12 +237,8 @@ namespace Kernel::Console {
 
     void jmp() {
         kinfo("Jumping to user mode...");
-        kwarn("You can't return to kernel console from this point.");
 
-        uint32_t* user_stack_base = (uint32_t*)malloc(4096);
-        uint32_t user_stack_top = (uint32_t)user_stack_base + 4096;
-
-        jump_to_user((uint32_t)user_mode_test, user_stack_top);
+        Multitask::create_task(user_mode_test, "Usermode", true);
     }
 
     void systemd() {
