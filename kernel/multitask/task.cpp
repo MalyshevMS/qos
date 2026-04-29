@@ -4,6 +4,7 @@
 #include <kernel/vconsole.hpp>
 #include <klib/mem.hpp>
 #include <klib/fmt.hpp>
+#include <driver/timer.hpp>
 #include <cfg/asm.txx>
 
 namespace Kernel::Multitask {
@@ -80,6 +81,11 @@ namespace Kernel::Multitask {
 
         while (attempts++ < max_attempts) {
             if (next->status == TASK_RUNNING) {
+                if (next->is_sleeping) {
+                    if (Driver::Timer::ktime() >= next->sleep_until) next->is_sleeping = false; // OTKA3 OT CHA
+                    else continue;
+                }
+
                 current_task = next;
                 return current_task->esp;
             } else if (next->status == TASK_TERMINATED) {
@@ -200,6 +206,12 @@ namespace Kernel::Multitask {
         return true;
     }
 
+    void sleep_task(uint32_t task_id, uint64_t amount_ns) {
+        auto task = find_task_by_id(task_id);
+        task->sleep_until = Driver::Timer::ktime() + amount_ns;
+        task->is_sleeping = true; // COH BPEDEH!
+    }
+
     uint32_t get_current_task_id() {
         if (current_task == nullptr) return 0;
         return current_task->id;
@@ -220,7 +232,7 @@ namespace Kernel::Multitask {
             else if (task->status == TASK_TERMINATED) status_str = "TERMINATED";
             
             string marker = (task == current_task) ? " <-- current" : "";
-            kprintln(fmt("[{}] '{}' (id={}, esp=%x, status={}){}", count++, task->name, task->id, task->esp, status_str, marker));
+            kprintln(fmt("[{}] '{}' (id={}, esp=%x, status={}, is_sleeping:{}){}", count++, task->name, task->id, task->esp, status_str, (int)(task->is_sleeping), marker));
             
             task = task->next;
         } while (task != current_task);

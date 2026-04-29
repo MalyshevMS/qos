@@ -63,17 +63,17 @@ extern "C" void exception_common_handler(Registers* regs) {
 
 extern "C" uint32_t syscall_handler(Registers* regs) {
     auto num = regs->eax;
+    auto tid = Multitask::get_current_task_id();
     uint32_t result_esp = (uint32_t)regs;
 
     if (num == 1) {
         kprint((const char*)regs->ebx);
     } else if (num == 2) {
-        Driver::Timer::sleep(regs->ebx);
+        Multitask::sleep_task(tid, regs->ebx * 1'000'000);
     } else if (num == 3) {
-        auto task = Multitask::get_current_task_id();
-        Multitask::kill_task(task);
+        Multitask::kill_task(tid);
 
-        kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
+        kwarn(kstd::fmt("Task {}: exiting via syscall.", tid));
 
         result_esp = Multitask::schedule((uint32_t)result_esp);
     } else {

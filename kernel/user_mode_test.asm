@@ -12,6 +12,10 @@ exit:
     int 0x80 ; Exit
 
 user_mode_test:
+    ; mov eax, 2
+    ; mov ebx, 1000
+    ; int 0x80 ; sleep
+
     call hello
     
     call exit
