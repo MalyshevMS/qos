@@ -5,14 +5,12 @@ extern syscall_handler
 syscall_stub:
     push 0
     push 0x80
-    pusha
+    pusha ; Save EDI, ESI, EBP, ESP, EBX, EDX, ECX, EAX
     
-    push ds
-    push es
-    push fs
-    push gs
+    mov ax, ds ; Save DS
+    push eax
 
-    mov ax, 0x10
+    mov ax, 0x10 ; Load Kernel Data Segment
     mov ds, ax
     mov es, ax
 
@@ -20,10 +18,10 @@ syscall_stub:
     call syscall_handler
     add esp, 4
 
-    pop gs
-    pop fs
-    pop es
-    pop ds
-    popa
+    pop eax
+    mov ds, ax
+    mov es, ax
+
+    popa ; Restore regiters
     add esp, 8
-    iretd
+    iretd ; Return to User Mode

@@ -233,17 +233,7 @@ namespace Kernel::Console {
         }
     }
 
-    void user_mode_test() {
-        asm volatile (
-            "movl $12, %%eax\n"
-            "int $0x80"
-            : 
-            :
-            : "eax"
-        );
-
-        for(;;);
-    }
+    extern "C" void user_mode_test();
 
     void jmp() {
         kinfo("Jumping to user mode...");

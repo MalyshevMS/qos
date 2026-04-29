@@ -61,7 +61,13 @@ extern "C" void exception_common_handler(Registers* regs) {
 }
 
 extern "C" void syscall_handler(Registers* regs) {
-    kinfo(kstd::fmt("EAX: {}", regs->eax));
+    auto num = regs->eax;
+
+    if (num == 1) {
+        kprint((const char*)regs->ebx);
+    } else {
+        kwarn("Unknown syscall.");
+    }
 }
 
 void idt_init() {
