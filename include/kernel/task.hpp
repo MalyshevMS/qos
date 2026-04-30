@@ -18,8 +18,6 @@ namespace Kernel::Multitask {
         TaskStatus status;        // Current task status
         bool is_user;             // Is user or a kernel task
         const char* name;         // Task name for debugging
-        uint64_t sleep_until;     // When to awake
-        bool is_sleeping = false; // Is waiting or not
         Task* next;               // Next task in circular list
         Task* prev;               // Previous task for easier removal
     };
@@ -31,8 +29,6 @@ namespace Kernel::Multitask {
     bool kill_task(uint32_t task_id);
     bool pause_task(uint32_t task_id);
     bool resume_task(uint32_t task_id);
-    void sleep_task(uint32_t task_id, uint64_t amount_ns);
-
     void list_tasks();
     uint32_t get_current_task_id();
     
