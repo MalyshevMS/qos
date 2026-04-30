@@ -44,6 +44,7 @@ void kernel_main() {
     Keyboard::init();
     ACPI::init();
     Timer::init_hpet();
+    Timer::timer_init(1'000); // Hz
     x86::pic_remap();
     x86::idt_init();
     PCI::init();

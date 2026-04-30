@@ -37,6 +37,15 @@ namespace Driver::Timer {
         // EOI_MASTER;
     }
 
+    void timer_init(uint32_t freq) {
+        uint32_t divisor = 1193182 / freq;
+
+        outb(0x43, 0x36);
+
+        outb(0x40, (uint8_t)(divisor & 0xFF));
+        outb(0x40, (uint8_t)(divisor >> 8));
+    }
+
     const x86::Registers* get_last_registers() {
         return registers;
     }
@@ -61,17 +70,17 @@ namespace Driver::Timer {
 
         hpet->configuration |= 0x01; 
 
-        kinfo(fmt("HPET:\tTick period (femtosecond): {}", femtoseconds_per_tick));
+        kinfo(fmt("HPET: Tick period (femtosecond): {}", femtoseconds_per_tick));
         
         ns_multiplier = ((uint32_t)femtoseconds_per_tick / (uint32_t)1'000'000U);
-        kinfo(fmt("HPET:\tNanoseconds multiplier: {}", ns_multiplier));
+        kinfo(fmt("HPET: Nanoseconds multiplier: {}", ns_multiplier));
         
         startup_ns = uptime_ns();
-        kinfo(fmt("HPET:\tStartup time (nanoseconds): {}", startup_ns));
+        kinfo(fmt("HPET: Startup time (nanoseconds): {}", startup_ns));
 
         stress_cpu(500);
         cpu_freq = calibrate_tsc();
-        kinfo(fmt("HPET:\tFrequency: {} Hz", cpu_freq));
+        kinfo(fmt("HPET: Frequency: {} Hz", cpu_freq));
     }
 
     uint64_t uptime_ns() {
