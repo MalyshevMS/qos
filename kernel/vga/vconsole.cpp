@@ -238,7 +238,7 @@ namespace Kernel {
 
     void kinfo(const string &text) {
         auto ktime = Driver::Timer::ktime_ms();
-        auto str = fmt("Kernel message [{}.{}]: {}", ktime / 1'000, ktime % 1'000, text);
+        auto str = fmt("[{}.{}]: {}", ktime / 1'000, ktime % 1'000, text);
         kcprint(str, 0x03);
     }
 

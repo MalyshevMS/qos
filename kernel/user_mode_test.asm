@@ -11,7 +11,21 @@ exit:
     mov eax, 3
     int 0x80 ; Exit
 
+sleep:
+    mov ebx, eax
+    mov eax, 2
+    int 0x80
+    ret
+
 user_mode_test:
+    mov eax, 10
+    call sleep
+
+    call hello
+
+    mov eax, 1000
+    call sleep
+
     call hello
     
     call exit

@@ -6,7 +6,8 @@ namespace Kernel::Multitask {
     enum TaskStatus {
         TASK_RUNNING,
         TASK_PAUSED,
-        TASK_TERMINATED
+        TASK_TERMINATED,
+        TASK_SLEEPING
     };
 
     struct Task {
@@ -18,6 +19,7 @@ namespace Kernel::Multitask {
         TaskStatus status;        // Current task status
         bool is_user;             // Is user or a kernel task
         const char* name;         // Task name for debugging
+        uint64_t wake_at;         // When to wake up (if sleeping)
         Task* next;               // Next task in circular list
         Task* prev;               // Previous task for easier removal
     };
@@ -29,6 +31,8 @@ namespace Kernel::Multitask {
     bool kill_task(uint32_t task_id);
     bool pause_task(uint32_t task_id);
     bool resume_task(uint32_t task_id);
+    void sleep_task(uint32_t task_id, uint32_t ms);
+
     void list_tasks();
     uint32_t get_current_task_id();
     

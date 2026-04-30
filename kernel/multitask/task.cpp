@@ -2,6 +2,7 @@
 #include <kernel/task.hpp>
 #include <kernel/memory.hpp>
 #include <kernel/vconsole.hpp>
+#include <driver/timer.hpp>
 #include <klib/mem.hpp>
 #include <klib/fmt.hpp>
 #include <cfg/asm.txx>
@@ -79,6 +80,9 @@ namespace Kernel::Multitask {
         const int max_attempts = 1000; // Prevent infinite loop
 
         while (attempts++ < max_attempts) {
+            if (next->status == TASK_SLEEPING) {
+                if (Driver::Timer::ktime_ms() >= next->wake_at) next->status = TASK_RUNNING;
+            }
             if (next->status == TASK_RUNNING) {
                 current_task = next;
                 return current_task->esp;
@@ -198,6 +202,13 @@ namespace Kernel::Multitask {
         task->status = TASK_RUNNING;
         kinfo(fmt("Task {} (%s) resumed", id, task->name));
         return true;
+    }
+
+    void sleep_task(uint32_t task_id, uint32_t ms) {
+        Task* task = find_task_by_id(task_id);
+
+        task->wake_at = Driver::Timer::ktime_ms() + ms;
+        task->status = TASK_SLEEPING;
     }
 
     uint32_t get_current_task_id() {
