@@ -31,6 +31,9 @@ klib/cstring.cpp \
 klib/string.cpp \
 klib/conv.cpp
 
+SYSCALLS = \
+kernel/syscall/exit.cpp
+
 ASM_SOURCES = \
 arch/x86/idt_load.asm \
 arch/x86/gdt_load.asm \
@@ -43,7 +46,10 @@ arch/x86/multiboot_header.asm \
 kernel/user_mode_test.asm
 
 # Script
-OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) $(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
+OBJECTS = \
+$(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SOURCES)) \
+$(patsubst %.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES)) \
+$(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SYSCALLS))
 
 CXX = g++
 LD = ld

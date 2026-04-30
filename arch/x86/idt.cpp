@@ -4,6 +4,7 @@
 #include <kernel/task.hpp>
 #include <klib/fmt.hpp>
 #include <driver/timer.hpp>
+#include <cfg/syscall.txx>
 
 namespace Arch::x86 {
 
@@ -13,6 +14,7 @@ static IDTEntry idt[256];
 static IDTPointer idt_ptr;
 static handler_t irq_handlers[16] = {0};
 static handler_t exception_handlers[32] = {0};
+static syscall_t syscall_handlers[SYSCALLS_COUNT];
 
 extern "C" void idt_load(uint32_t);
 extern "C" void syscall_stub();
@@ -33,6 +35,10 @@ void irq_register_handler(int irq, handler_t handler) {
 
 void exception_register_handler(int n, handler_t handler) {
     if (n < 32) exception_handlers[n] = handler;
+}
+
+void syscall_register_handler(int n, syscall_t handler) {
+    syscall_handlers[n] = handler;
 }
 
 extern "C" uint32_t irq_common_handler(Registers* regs) {
@@ -62,27 +68,28 @@ extern "C" void exception_common_handler(Registers* regs) {
 }
 
 extern "C" uint32_t syscall_handler(Registers* regs) {
-    uint32_t num = regs->eax;
-    uint32_t result_esp = (uint32_t)regs;
-    uint32_t task = Multitask::get_current_task_id();
+    auto handler = syscall_handlers[regs->eax];
 
-    if (num == 1) {
-        kinfo((const char*)regs->ebx);
-    } else if (num == 2) {
-        Multitask::sleep_task(task, regs->ebx);
-        Multitask::list_tasks();
-        return Multitask::schedule((uint32_t)result_esp);
-    } else if (num == 3) {
-        Multitask::kill_task(task);
+    if (handler) return handler(regs);
 
-        kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
+    // if (num == 1) {
+    //     kinfo((const char*)regs->ebx);
+    // } else if (num == 2) {
+    //     Multitask::sleep_task(task, regs->ebx);
+    //     result_esp = Multitask::schedule((uint32_t)result_esp);
+    // } else if (num == 3) {
+    //     Multitask::kill_task(task);
 
-        result_esp = Multitask::schedule((uint32_t)result_esp);
-    } else {
-        kwarn("Unknown syscall.");
-    }
+    //     kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
 
-    return result_esp;
+    //     result_esp = Multitask::schedule((uint32_t)result_esp);
+    // } else {
+    //     kwarn("Unknown syscall.");
+    // }
+
+    kwarn(kstd::fmt("Unknown syscall '{}'.", regs->eax));
+
+    return (uint32_t)regs;
 }
 
 void idt_init() {

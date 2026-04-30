@@ -8,6 +8,7 @@
 #include <kernel/power.hpp>
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
+#include <kernel/syscall.hpp>
 
 #include <driver/keyboard.hpp>
 #include <driver/timer.hpp>
@@ -28,6 +29,7 @@ using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
 using namespace Driver;
+using namespace Syscall;
 using namespace kstd;
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
@@ -61,6 +63,8 @@ void kernel_main() {
     x86::exception_register_handler(0x06, (x86::handler_t)&x86::Exceptions::invalid_opcode);
     x86::exception_register_handler(0x08, (x86::handler_t)&x86::Exceptions::double_fault);
     x86::exception_register_handler(0x0D, (x86::handler_t)&x86::Exceptions::general_protection_fault);
+
+    x86::syscall_register_handler(SYS_EXIT, sys_exit);
 
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));
