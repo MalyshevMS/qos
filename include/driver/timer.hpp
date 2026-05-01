@@ -23,5 +23,13 @@ namespace Timer {
 
     void sleep_ns(uint64_t nanoseconds);
     inline void sleep(uint64_t ms) { sleep_ns(ms * 1'000'000ull); }
+
+    // Test and diagnostic functions
+    void test_hpet_counter();
+    void test_timer_interrupts();
+    void set_timer_frequency(uint32_t freq);
+    void set_max_precision();
+    void print_hpet_info();
+    uint64_t measure_jitter(uint32_t samples);
 }; // namespace Timer
 }; // namespace Driver

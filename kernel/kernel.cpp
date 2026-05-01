@@ -32,18 +32,6 @@ using namespace Driver;
 using namespace Syscall;
 using namespace kstd;
 
-extern "C" void jump_to_user(uint32_t, uint32_t);
-
-// void sys_exit(x86::Registers* regs, uint32_t& result_esp) {
-//     auto task = Multitask::get_current_task_id();
-
-//     Multitask::kill_task(task);
-
-//     kinfo(fmt("Task {}: exited via syscall with code {}", task, regs->ebx));
-
-//     result_esp = Multitask::schedule((uint32_t)result_esp);
-// }
-
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
@@ -57,6 +45,7 @@ void kernel_main() {
     ACPI::init();
     Timer::init_hpet();
     Timer::timer_init(1'000); // Hz
+    Timer::set_max_precision();
     x86::pic_remap();
     x86::idt_init();
     PCI::init();
@@ -88,7 +77,7 @@ void kernel_main() {
 
     INT_ENABLE;
     SHOW_INT_ENABLE;
-    
+
     Console::init();
     Console::run();
 

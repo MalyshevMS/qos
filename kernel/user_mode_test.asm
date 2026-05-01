@@ -11,7 +11,7 @@ user_mode_test:
     int 0x80 ; Print
 
     mov eax, 2
-    mov ebx, 500
+    mov ebx, 1000
     int 0x80 ; Sleep
 
     mov eax, 1

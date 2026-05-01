@@ -66,7 +66,13 @@ namespace Kernel::Console {
         kprintln("    tasks - list all tasks");
         kprintln("    runtask - run simple task (infinitly print to serial with counter)");
         kprintln("    kill/pause/resume <id> - manipulate task with ID");
-        kprintln("    jmp - jump to user mode. the only way to return back is rebooting physicaly");
+        kprintln("    jmp - jump to user mode");
+        kprintln("    timerinfo - show detailed HPET information");
+        kprintln("    testcounter - test HPET counter functionality");
+        kprintln("    testirq - test timer interrupts (1 second)");
+        kprintln("    timerfreq <hz> - set timer frequency (e.g., 1000, 10000)");
+        kprintln("    maxprecision - set to 10 kHz (maximum precision)");
+        kprintln("    jittermeter [samples] - measure timer jitter (default 1000 samples)");
     }
 
     void clear() {
@@ -348,6 +354,30 @@ namespace Kernel::Console {
             pause(args);
         } else if (cmd == "resume") {
             resume(args);
+        } else if (cmd == "timerinfo") {
+            Timer::print_hpet_info();
+        } else if (cmd == "testcounter") {
+            Timer::test_hpet_counter();
+        } else if (cmd == "testirq") {
+            Timer::test_timer_interrupts();
+        } else if (cmd == "timerfreq") {
+            if (args.empty()) {
+                kwarn("Usage: timerfreq <frequency_hz>");
+                kinfo("Examples: timerfreq 1000 (1 kHz), timerfreq 10000 (10 kHz max precision)");
+                return;
+            }
+            uint32_t freq = to_uint32(args);
+            if (freq == 0 || freq == -1U) {
+                kwarn(fmt("Invalid frequency: {}", args));
+                return;
+            }
+            Timer::set_timer_frequency(freq);
+        } else if (cmd == "maxprecision") {
+            Timer::set_max_precision();
+        } else if (cmd == "jittermeter") {
+            uint32_t samples = args.empty() ? 1000 : to_uint32(args);
+            if (samples == 0 || samples == -1U) samples = 1000;
+            Timer::measure_jitter(samples);
         } else if (cmd == "jmp") {
             jmp();
         } else if (cmd == "poweroff" || cmd == "exit") {
