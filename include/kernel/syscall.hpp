@@ -7,5 +7,7 @@
 namespace Kernel {
 namespace Syscall {
     void sys_exit(SYSCALL_ARGS);
+    void sys_sleep(SYSCALL_ARGS);
+    void sys_print(SYSCALL_ARGS);
 }; // namespace Syscall
 }; // namespace Kernel

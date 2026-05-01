@@ -75,6 +75,8 @@ void kernel_main() {
     x86::exception_register_handler(0x0D, x86::Exceptions::general_protection_fault);
 
     x86::syscall_register_handler(SYS_EXIT, sys_exit);
+    x86::syscall_register_handler(SYS_SLEEP, sys_sleep);
+    x86::syscall_register_handler(SYS_PRINT, sys_print);
 
     kinfo(fmt("Kernel time: {} nanoseconds", Timer::ktime()));
     kinfo(fmt("Zero uptime: {} nanoseconds", Timer::uptime_ns()));

@@ -32,7 +32,9 @@ klib/string.cpp \
 klib/conv.cpp
 
 SYSCALLS = \
-kernel/syscall/exit.cpp
+kernel/syscall/exit.cpp \
+kernel/syscall/sleep.cpp \
+kernel/syscall/print.cpp
 
 ASM_SOURCES = \
 arch/x86/idt_load.asm \

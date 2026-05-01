@@ -69,28 +69,7 @@ extern "C" void exception_common_handler(Registers* regs) {
 
 
 extern "C" uint32_t syscall_handler(Registers* regs) {
-    // uint32_t num = regs->eax;
     uint32_t result_esp = (uint32_t)regs;
-    // uint32_t task = Multitask::get_current_task_id();
-
-    // if (num == 1) {
-    //     kinfo((const char*)regs->ebx);
-    // } else if (num == 2) {
-    //     Multitask::sleep_task(task, regs->ebx);
-    //     Multitask::list_tasks();
-    //     return Multitask::schedule((uint32_t)result_esp);
-    // } else if (num == 3) {
-    //     Multitask::kill_task(task);
-
-    //     kinfo(kstd::fmt("Task {}: exiting via syscall.", task));
-
-    //     result_esp = Multitask::schedule((uint32_t)result_esp);
-    // } else {
-    //     kwarn("Unknown syscall.");
-    // }
-
-    // return result_esp;
-
     auto handler = syscall_handlers[regs->eax];
 
     if (handler) handler(regs, result_esp);
