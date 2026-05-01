@@ -82,5 +82,6 @@ void kernel_main() {
     Console::run();
 
     // Shouldn't be reached
+    kwarn("You have reached the end of kernel control.");
     for (;;) CPU_HALT;
 }

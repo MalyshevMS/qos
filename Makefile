@@ -29,7 +29,8 @@ driver/sata.cpp \
 klib/mem.cpp \
 klib/cstring.cpp \
 klib/string.cpp \
-klib/conv.cpp
+klib/conv.cpp \
+user/user_main.cpp
 
 SYSCALLS = \
 kernel/syscall/exit.cpp \
@@ -45,7 +46,6 @@ arch/x86/exception_handler.asm \
 arch/x86/jump_to_user.asm \
 arch/x86/syscall_stub.asm \
 arch/x86/multiboot_header.asm \
-kernel/user_mode_test.asm
 
 # Script
 OBJECTS = \

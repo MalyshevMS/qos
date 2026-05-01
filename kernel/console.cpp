@@ -239,12 +239,13 @@ namespace Kernel::Console {
         }
     }
 
-    extern "C" void user_mode_test();
+    extern "C" void user_main();
 
     void jmp() {
+        running = false;
         kinfo("Jumping to user mode...");
 
-        Multitask::create_task(user_mode_test, "Usermode", true);
+        Multitask::create_task(user_main, "Usermode", true);
     }
 
     void systemd() {
@@ -429,9 +430,10 @@ namespace Kernel::Console {
                     kprintln();
                     
                     if (!input.empty()) {
-                        // Serial::println("Command: '{}'", input);
                         execute_command(input);
                     }
+
+                    if (!running) break;
 
                     input.clear();
                     kprint(prompt);
