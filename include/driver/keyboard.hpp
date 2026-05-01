@@ -116,7 +116,7 @@ namespace Keyboard {
 
     char scantochar(uint8_t scancode);
 
-    void keyboard_callback(const Arch::x86::Registers* regs);
+    void keyboard_callback(Arch::x86::Registers* regs);
 
 } // namespace Keyboard
 } // namespace Kernel

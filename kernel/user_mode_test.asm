@@ -2,10 +2,8 @@
 global user_mode_test
 
 user_mode_test:
-    
-
     mov eax, 1
-    mov ebx, 0
+    mov ebx, 1234
     int 0x80
     jmp $ ; Not necessary, but recomended
 

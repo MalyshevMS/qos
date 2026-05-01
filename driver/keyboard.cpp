@@ -164,7 +164,7 @@ static const char scancode_to_char_shift[] = {
     0,      // 0x46 - SCROLLLOCK
 };
 
-void keyboard_callback(const x86::Registers* regs) {
+void keyboard_callback(x86::Registers* regs) {
     uint8_t scancode = inb(0x60);
     
     if (scancode & 0x80) {

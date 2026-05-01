@@ -34,6 +34,16 @@ using namespace kstd;
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
 
+// void sys_exit(x86::Registers* regs, uint32_t& result_esp) {
+//     auto task = Multitask::get_current_task_id();
+
+//     Multitask::kill_task(task);
+
+//     kinfo(fmt("Task {}: exited via syscall with code {}", task, regs->ebx));
+
+//     result_esp = Multitask::schedule((uint32_t)result_esp);
+// }
+
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
@@ -53,16 +63,16 @@ void kernel_main() {
     Disk::init();
     Multitask::init();
 
-    x86::irq_register_handler(0, (x86::handler_t)&Timer::timer_callback);
+    x86::irq_register_handler(0, Timer::timer_callback);
     x86::pic_unmask_irq(0);
 
-    x86::irq_register_handler(1, (x86::handler_t)&Keyboard::keyboard_callback);
+    x86::irq_register_handler(1, Keyboard::keyboard_callback);
     x86::pic_unmask_irq(1);
 
-    x86::exception_register_handler(0x00, (x86::handler_t)&x86::Exceptions::division_error);
-    x86::exception_register_handler(0x06, (x86::handler_t)&x86::Exceptions::invalid_opcode);
-    x86::exception_register_handler(0x08, (x86::handler_t)&x86::Exceptions::double_fault);
-    x86::exception_register_handler(0x0D, (x86::handler_t)&x86::Exceptions::general_protection_fault);
+    x86::exception_register_handler(0x00, x86::Exceptions::division_error);
+    x86::exception_register_handler(0x06, x86::Exceptions::invalid_opcode);
+    x86::exception_register_handler(0x08, x86::Exceptions::double_fault);
+    x86::exception_register_handler(0x0D, x86::Exceptions::general_protection_fault);
 
     x86::syscall_register_handler(SYS_EXIT, sys_exit);
 

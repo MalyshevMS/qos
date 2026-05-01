@@ -26,7 +26,7 @@ namespace x86 {
     } PACK;
 
     typedef void (*handler_t)(Registers*);
-    typedef uint32_t (*syscall_t)(Registers*);
+    typedef void (*syscall_t)(Registers*, uint32_t&);
 
     void idt_init();
     void idt_set_gate(int n, uint32_t handler, uint8_t dpl = 0);

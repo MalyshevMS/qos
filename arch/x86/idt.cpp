@@ -67,16 +67,18 @@ extern "C" void exception_common_handler(Registers* regs) {
     }
 }
 
-extern "C" uint32_t syscall_handler(Registers* regs) {
-    auto handler = syscall_handlers[regs->eax];
 
-    if (handler) return handler(regs);
+extern "C" uint32_t syscall_handler(Registers* regs) {
+    // uint32_t num = regs->eax;
+    uint32_t result_esp = (uint32_t)regs;
+    // uint32_t task = Multitask::get_current_task_id();
 
     // if (num == 1) {
     //     kinfo((const char*)regs->ebx);
     // } else if (num == 2) {
     //     Multitask::sleep_task(task, regs->ebx);
-    //     result_esp = Multitask::schedule((uint32_t)result_esp);
+    //     Multitask::list_tasks();
+    //     return Multitask::schedule((uint32_t)result_esp);
     // } else if (num == 3) {
     //     Multitask::kill_task(task);
 
@@ -87,9 +89,14 @@ extern "C" uint32_t syscall_handler(Registers* regs) {
     //     kwarn("Unknown syscall.");
     // }
 
-    kwarn(kstd::fmt("Unknown syscall '{}'.", regs->eax));
+    // return result_esp;
 
-    return (uint32_t)regs;
+    auto handler = syscall_handlers[regs->eax];
+
+    if (handler) handler(regs, result_esp);
+    else kwarn(kstd::fmt("Unknown syscall '{}'", regs->eax));
+
+    return result_esp;
 }
 
 void idt_init() {
