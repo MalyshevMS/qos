@@ -59,7 +59,7 @@ namespace Kernel::Console {
         kprintln("    info - system info");
         kprintln("    lspci - list PCI devices");
         kprintln("    satainfo - list SATA devices");
-        kprintln("    rfs <device> - read first sector from SATA device");
+        kprintln("    rs <device> [LBA] - read sector from SATA device");
         kprintln("    sleep <amount> - wait for milliseconds");
         kprintln("    reboot - reboot the system");
         kprintln("    exit/poweroff - power off the system");
