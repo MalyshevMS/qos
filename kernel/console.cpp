@@ -173,7 +173,7 @@ namespace Kernel::Console {
     void runtask() {
         auto task = [](){
             int c = 0;
-            while (1) {
+            while (c < 10) {
                 Serial::println(fmt("[{}] running task...", c++));
                 Timer::sleep(500);
             }

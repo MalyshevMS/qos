@@ -3,6 +3,8 @@
 #include <klib/string.hpp>
 
 namespace Kernel::Multitask {
+    typedef void (*task_t)();
+
     enum TaskStatus {
         TASK_RUNNING,
         TASK_PAUSED,
@@ -22,10 +24,11 @@ namespace Kernel::Multitask {
         uint64_t wake_at;         // When to wake up (if sleeping)
         Task* next;               // Next task in circular list
         Task* prev;               // Previous task for easier removal
+        task_t entry_point;       // Entry point (function) for the task
     };
 
     void init();
-    uint32_t create_task(void (*entry_point)(), const char* name = "task", bool user = false);
+    uint32_t create_task(task_t entry_point, const char* name = "task", bool user = false);
     uint32_t schedule(uint32_t current_esp);
     
     bool kill_task(uint32_t task_id);

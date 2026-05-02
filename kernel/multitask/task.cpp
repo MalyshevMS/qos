@@ -25,6 +25,23 @@ namespace Kernel::Multitask {
         while (1) CPU_HALT;
     }
 
+    extern "C" void wrapper_kernel() {
+        if (current_task && current_task->entry_point) current_task->entry_point();
+        task_exit();
+    }
+
+    extern "C" void wrapper_user() {
+        if (current_task && current_task->entry_point) current_task->entry_point();
+        asm volatile (
+            "movl $1, %%eax\n"
+            "movl $0, %%ebx\n"
+            "int $0x80"
+            :
+            :
+            : "eax", "ebx"
+        );
+    }
+
     void init() {
         create_task(nullptr, "idle");
     }
@@ -102,7 +119,7 @@ namespace Kernel::Multitask {
         return current_task->esp;
     }
 
-    uint32_t create_task(void (*entry_point)(), const char* name, bool user) {
+    uint32_t create_task(task_t entry_point, const char* name, bool user) {
         Task* new_task = (Task*)malloc(sizeof(Task));
 
         uint32_t* kstack = (uint32_t*)malloc(TASK_STACK_SIZE);
@@ -119,11 +136,11 @@ namespace Kernel::Multitask {
             *(--ptr) = (uint32_t)ptr + 4;   // ESP (user)
             *(--ptr) = 0x202;               // EFLAGS
             *(--ptr) = 0x1B;                // CS (user)
-            *(--ptr) = (uint32_t)entry_point;
+            *(--ptr) = (uint32_t)wrapper_user;
         } else {
             *(--ptr) = 0x202;               //  EFLAGS
             *(--ptr) = 0x08;                // Kernel Code
-            *(--ptr) = (uint32_t)entry_point;
+            *(--ptr) = (uint32_t)wrapper_kernel;
         }
 
         *(--ptr) = 0; // err_code
@@ -140,6 +157,7 @@ namespace Kernel::Multitask {
         new_task->name = name ? name : "unnamed";
         new_task->next = new_task;
         new_task->prev = new_task;
+        new_task->entry_point = entry_point;
 
         if (current_task == nullptr) {
             new_task->next = new_task;
