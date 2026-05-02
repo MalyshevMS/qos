@@ -112,8 +112,9 @@ namespace Kernel::Console {
         }
     }
 
-    void rfs(const string& args) {
-        int device_index = to_uint32(args);
+    void rs(const string& args) {
+        int device_index = to_uint32(get_command(args));
+        int sector = to_uint32(get_args(args));
 
         int count = Disk::device_count();
         if (count == 0) {
@@ -126,7 +127,7 @@ namespace Kernel::Console {
         }
 
         auto buffer = new uint8_t[512];
-        bool ok = Disk::read_sectors(device_index, buffer, 0, 1);
+        bool ok = Disk::read_sectors(device_index, buffer, sector, 1);
         if (!ok) {
             kprintln("Disk read failed.");
             delete[] buffer;
@@ -337,8 +338,8 @@ namespace Kernel::Console {
             lspci();
         } else if (cmd == "satainfo") {
             satainfo();
-        } else if (cmd == "rfs") {
-            rfs(args);
+        } else if (cmd == "rs") {
+            rs(args);
         } else if (cmd == "sleep") {
             sleep(args);
         } else if (cmd == "reboot") {

@@ -1,9 +1,9 @@
 # User config
 BUILD_DIR = build
 PYTHON_DIR = py
-DISK_SIZE = 512 # Bytes TODO: Add more types (like K, M, G, etc.)
-DISK_MSG_1 = "Hello, from disk 1" # Only appears in disk_msg section
-DISK_MSG_2 = "Hello, from disk 2"
+DISK_SIZE = 1024 # Bytes TODO: Add more types (like K, M, G, etc.)
+DISK_MSG_1 = "Hello from disk 1" # Only appears in disk_msg section
+DISK_MSG_2 = "Hello from disk 2"
 
 SOURCES = \
 kernel/kernel.cpp \

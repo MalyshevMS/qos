@@ -9,6 +9,7 @@ def main():
     parser.add_argument("file_path", help="Disk path")
     parser.add_argument("message", help="Message to write at disk's top")
     parser.add_argument("target_size", type=int, help="Disk size")
+    padding = b""
 
     args = parser.parse_args()
 
@@ -21,7 +22,8 @@ def main():
         msg_bytes = msg_bytes[:args.target_size]
         padding = b""
     else:
-        padding = os.urandom(args.target_size - len(msg_bytes))
+        for _ in range(args.target_size - len(msg_bytes)):
+            padding += b"0"
 
     try:
         with open(args.file_path, 'wb') as f:
