@@ -7,5 +7,5 @@ extern "C" void user_main() {
         print("Hello, world!\n");
     }
     
-    exit(1234);
+    // exit(1234);
 }

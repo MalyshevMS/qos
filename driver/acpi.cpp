@@ -3,6 +3,7 @@
 #include <klib/cstring.hpp>
 #include <kernel/serial.hpp>
 #include <kernel/ports.hpp>
+#include <kernel/memory.hpp>
 
 using namespace kstd;
 using namespace Kernel;
@@ -119,6 +120,7 @@ bool poweroff() {
     val &= ~(7 << 10);  // Clear SLP_TYP field
     val |= (SLP_TYP << 10) | SLP_EN;
     
+    kinfo(fmt("Leaked: {} bytes", Mem::leaked()));
     kinfo("Powered off.");
     outw(fadt->PM1a_CNT_BLK, val);
     

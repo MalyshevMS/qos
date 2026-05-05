@@ -15,7 +15,7 @@ namespace Kernel::Multitask {
     struct Task {
         uint32_t id;              // Unique task ID
         uint32_t esp;             // Stack pointer
-        uint32_t* stack_base;     // Allocated stack base
+        uint32_t* user_stack;     // Allocated stack base
         uint32_t* kernel_stack;   // Kernel stack pointer
         uint32_t kstack_top;      // Top of the kernel stack
         TaskStatus status;        // Current task status
@@ -28,7 +28,7 @@ namespace Kernel::Multitask {
     };
 
     void init();
-    uint32_t create_task(task_t entry_point, const char* name = "task", bool user = false);
+    uint32_t create_task(task_t entry_point, const char* name = "task", bool user = false, uint32_t stack_size = 4096U);
     uint32_t schedule(uint32_t current_esp);
     
     bool kill_task(uint32_t task_id);

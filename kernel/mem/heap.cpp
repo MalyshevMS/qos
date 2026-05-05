@@ -14,6 +14,7 @@ struct BlockHeader {
 
 
 static BlockHeader* heap_head = nullptr;
+static uint64_t leaked_bytes = 0;
 
 void meminit() {
     heap_head = (BlockHeader*)HEAP_START;
@@ -24,7 +25,7 @@ void meminit() {
 }
 
 void *malloc(size_t size) {
-    size = (size + 7) & ~7;
+    // size = (size + 7) & /*4EPBU*/~7;
     auto current = heap_head;
 
     while (current) {
@@ -42,6 +43,7 @@ void *malloc(size_t size) {
 
             current->free = false;
 
+            leaked_bytes += size;
             return (uint8_t*)current + sizeof(BlockHeader);
         }
 
@@ -56,6 +58,7 @@ void free(void *ptr) {
 
     auto block = (BlockHeader*)((uint8_t*)ptr - sizeof(BlockHeader));
 
+    leaked_bytes -= block->size;
     block->free = true;
 
     auto current = heap_head;
@@ -70,6 +73,10 @@ void free(void *ptr) {
         current = current->next;
     }
     
+}
+
+uint64_t leaked() {
+    return leaked_bytes;
 }
 
 } // namespace Kernel::Mem

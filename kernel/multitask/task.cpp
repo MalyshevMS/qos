@@ -14,7 +14,6 @@ namespace Kernel::Multitask {
 
     static Task* current_task = nullptr;
     static uint32_t task_id_counter = 0;
-    static const uint32_t TASK_STACK_SIZE = 4096;
 
     extern "C" void task_exit() {
         if (current_task != nullptr) {
@@ -34,7 +33,7 @@ namespace Kernel::Multitask {
         if (current_task && current_task->entry_point) current_task->entry_point();
         asm volatile (
             "movl $1, %%eax\n"
-            "movl $0, %%ebx\n"
+            "movl $1488, %%ebx\n"
             "int $0x80"
             :
             :
@@ -43,7 +42,7 @@ namespace Kernel::Multitask {
     }
 
     void init() {
-        create_task(nullptr, "idle");
+        create_task(nullptr, "idle", false, 128);
     }
 
     Task* find_task_by_id(uint32_t id) {
@@ -78,8 +77,11 @@ namespace Kernel::Multitask {
         }
         
         // Free resources
-        if (task->stack_base != nullptr) {
-            free(task->stack_base);
+        if (task->kernel_stack != nullptr) {
+            free(task->kernel_stack);
+        }
+        if (task->user_stack != nullptr) {
+            free(task->user_stack);
         }
         free(task);
     }
@@ -119,17 +121,17 @@ namespace Kernel::Multitask {
         return current_task->esp;
     }
 
-    uint32_t create_task(task_t entry_point, const char* name, bool user) {
+    uint32_t create_task(task_t entry_point, const char* name, bool user, uint32_t stack_size) {
         Task* new_task = (Task*)malloc(sizeof(Task));
 
-        uint32_t* kstack = (uint32_t*)malloc(TASK_STACK_SIZE);
+        uint32_t* kstack = (uint32_t*)malloc(stack_size);
         new_task->kernel_stack = kstack;
-        new_task->kstack_top = (uint32_t)kstack + TASK_STACK_SIZE;
+        new_task->kstack_top = (uint32_t)kstack + stack_size;
         new_task->is_user = user;
 
-        uint32_t* ustack = (uint32_t*)malloc(TASK_STACK_SIZE);
-        new_task->stack_base = ustack;
-        uint32_t* ptr = (uint32_t*)((uint32_t)ustack + TASK_STACK_SIZE);
+        uint32_t* ustack = (uint32_t*)malloc(stack_size);
+        new_task->user_stack = ustack;
+        uint32_t* ptr = (uint32_t*)((uint32_t)ustack + stack_size);
 
         if (user) {
             *(--ptr) = 0x23;                // SS (user)

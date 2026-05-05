@@ -2,7 +2,7 @@
 
 using namespace Kernel::Mem;
 
-inline void *operator new(size_t size) {
+void *operator new(size_t size) {
     return malloc(size);
 }
 
