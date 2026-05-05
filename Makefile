@@ -15,6 +15,7 @@ kernel/mem/heap.cpp \
 kernel/mem/new.cpp \
 kernel/hardware/power.cpp \
 kernel/multitask/task.cpp \
+kernel/fs/vfs.cpp \
 kernel/runtime.cpp \
 arch/x86/idt.cpp \
 arch/x86/pic.cpp \

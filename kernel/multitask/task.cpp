@@ -122,7 +122,7 @@ namespace Kernel::Multitask {
     }
 
     uint32_t create_task(task_t entry_point, const char* name, bool user, uint32_t stack_size) {
-        Task* new_task = (Task*)malloc(sizeof(Task));
+        auto new_task = new Task;
 
         uint32_t* kstack = (uint32_t*)malloc(stack_size);
         new_task->kernel_stack = kstack;

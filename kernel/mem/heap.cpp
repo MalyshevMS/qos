@@ -1,10 +1,12 @@
 #include <kernel/memory.hpp>
+#include <cfg/flags.txx>
 #include <cstdint>
 
 namespace Kernel::Mem {
 
-#define HEAP_START (0x200000)
-#define HEAP_SIZE  (0x100000)
+#define HEAP_START  (0x200000)
+#define HEAP_SIZE   (0x100000)
+#define ALIGNMENT   (8) // bytes (must be power of 2)
 
 struct BlockHeader {
     size_t size;
@@ -25,7 +27,7 @@ void meminit() {
 }
 
 void *malloc(size_t size) {
-    // size = (size + 7) & /*4EPBU*/~7;
+    size = (size + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1);
     auto current = heap_head;
 
     while (current) {

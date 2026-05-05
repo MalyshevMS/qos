@@ -9,6 +9,7 @@
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
 #include <kernel/syscall.hpp>
+#include <kernel/fs.hpp>
 
 #include <driver/keyboard.hpp>
 #include <driver/timer.hpp>
@@ -31,6 +32,9 @@ using namespace Arch;
 using namespace Driver;
 using namespace Syscall;
 using namespace kstd;
+
+extern "C" void vfs_init();
+extern FS::VFSNode* vfs_root;
 
 KERNEL_ENTRY
 void kernel_main() {
@@ -78,8 +82,18 @@ void kernel_main() {
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
-    Console::init();
-    Console::run();
+    vfs_init();
+
+    auto procdir = FS::vfs_root->finddir(FS::vfs_root, "proc");
+
+    auto version = procdir->finddir(procdir, "version");
+
+    auto buff = new char[16];
+    auto size = version->read(version, 0, 16, (uint8_t*)buff);
+    kinfo(fmt("Version file content: {}", string(buff, size)));
+
+    // Console::init();
+    // Console::run();
 
     // Shouldn't be reached
     kwarn("You have reached the end of kernel control.");
