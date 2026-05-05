@@ -37,16 +37,6 @@ VFSNode* root_finddir(VFSNode* node, const char* name) {
 }
 
 extern "C" void vfs_init() {
-    // vfs_root = new VFSNode;
-
-    // memset(vfs_root, 0, sizeof(VFSNode));
-
-    // memcpy(vfs_root->name, "/", 2);
-    // vfs_root->type = FS_DIR;
-    // vfs_root->finddir = root_finddir;
-
-    // kinfo("VFS: Root initialized at '/'");
-
     // "/"
     vfs_root = new VFSNode;
     memset(vfs_root, 0, sizeof(VFSNode));
