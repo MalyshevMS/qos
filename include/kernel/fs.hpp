@@ -23,6 +23,8 @@ namespace FS {
         VFSNode* (*finddir)(VFSNode* node, const char* name);
     };
 
+    void vfs_init();
+
     extern VFSNode* vfs_root;
 }; // namespace FS
 }; // namespace Kernel

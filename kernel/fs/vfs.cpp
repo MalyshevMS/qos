@@ -36,7 +36,7 @@ VFSNode* root_finddir(VFSNode* node, const char* name) {
     return nullptr;
 }
 
-extern "C" void vfs_init() {
+void vfs_init() {
     // "/"
     vfs_root = new VFSNode;
     memset(vfs_root, 0, sizeof(VFSNode));

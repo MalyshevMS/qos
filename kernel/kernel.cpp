@@ -30,11 +30,9 @@ using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
 using namespace Driver;
+using namespace FS;
 using namespace Syscall;
 using namespace kstd;
-
-extern "C" void vfs_init();
-extern FS::VFSNode* vfs_root;
 
 KERNEL_ENTRY
 void kernel_main() {
@@ -84,12 +82,12 @@ void kernel_main() {
 
     vfs_init();
 
-    auto procdir = FS::vfs_root->finddir(FS::vfs_root, "proc");
+    // auto procdir = vfs_root->finddir(vfs_root, "proc");
 
-    auto version = procdir->finddir(procdir, "version");
+    // auto version = procdir->finddir(procdir, "version");
 
     auto buff = new char[16];
-    auto size = version->read(version, 0, 16, (uint8_t*)buff);
+    auto size = vfs_root->finddir(nullptr, "proc")->finddir(nullptr, "version")->read(nullptr, 0, 16, (uint8_t*)buff);
     kinfo(fmt("Version file content: {}", string(buff, size)));
 
     // Console::init();
