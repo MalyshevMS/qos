@@ -1,4 +1,4 @@
-void exit(int code) {
+inline void exit(int code) {
     asm volatile (
         "movl $1, %%eax\n"
         "movl %0, %%ebx\n"
@@ -9,7 +9,7 @@ void exit(int code) {
     );
 }
 
-void sleep(int ms) {
+inline void sleep(int ms) {
     asm volatile (
         "movl $2, %%eax\n"
         "movl %0, %%ebx\n"
@@ -20,8 +20,8 @@ void sleep(int ms) {
     );
 }
 
-void print(const char* text) {
-    asm volatile (
+inline void print(const char *text) {
+    asm volatile(
         "movl $3, %%eax\n"
         "movl %0, %%ebx\n"
         "int $0x80"
