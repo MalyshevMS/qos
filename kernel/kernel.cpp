@@ -1,6 +1,8 @@
+#include "klib/cstring.hpp"
 #include <cfg/asm.txx>
 #include <cfg/flags.txx>
 
+#include <cstdint>
 #include <kernel/console.hpp>
 #include <kernel/fs.hpp>
 #include <kernel/memory.hpp>
@@ -93,6 +95,20 @@ void kernel_main() {
 
     kdebug(fmt("/ram: %x", ram_addr));
     kdebug(fmt("/ram/test: %x", test_addr));
+
+    RamFS::create_file(static_cast<RamFS::RamNode*>(test_addr), "file.txt");
+    
+    auto file_addr = test_addr->finddir(test_addr, "file.txt");
+    kdebug(fmt("/ram/test/file.txt: %x", file_addr));
+
+    const char* str = "Hello, World!";
+    file_addr->write(file_addr, 0, strlen(str), (uint8_t*)str);
+
+    auto read = new char[64];
+    auto bytes = file_addr->read(file_addr, 0, 64, (uint8_t*)read);
+    auto str_read = string(read, bytes);
+
+    kdebug(fmt("/ram/test/file.txt::read: '{}'", str_read));
 
     kwarn("You have reached the end of kernel control.");
     for (;;)
