@@ -31,6 +31,32 @@ Node* create_node(const char* name) {
     return node;
 }
 
+Node* find_node(const char* path) {
+    Node* current = nullptr;
+    if (path[0] == '/') current = vfs_root;
+    // TODO: check for ~ when you add /home/...
+
+    auto len = strlen(path);
+
+    if (path[len - 1] == '/') len--;
+
+    string buffer = "";
+
+    for (int i = 1; i < len; i++) {
+        if (path[i] == '/') {
+            current = current->finddir(current, buffer.c_str());
+            if (!current) return nullptr;
+            buffer = "";
+        } else {
+            buffer += path[i];
+        }
+    }
+
+    current = current->finddir(current, buffer.c_str());
+
+    return current;
+}
+
 void init() {
     vfs_root = create_node("/");
     vfs_root->type = FS_DIR;

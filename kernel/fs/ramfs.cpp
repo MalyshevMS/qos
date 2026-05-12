@@ -45,17 +45,22 @@ namespace Kernel::FS::RamFS {
     }
 
     static uint32_t ram_write(VFS::Node* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
+        kwarn("did we get here? 1");
         auto ramnode = static_cast<RamNode*>(node);
+        kwarn("did we get here? 2");
 
         if (offset + size > ramnode->capacity) ramnode_realloc(ramnode, (offset + size) * 2);
+        kwarn("did we get here? 3");
 
         kstd::memcpy(ramnode->buffer + offset, buffer, size);
+        kwarn("did we get here? 4");
 
         if (offset + size > ramnode->size) {
             ramnode->size = offset + size;
         }
+        kwarn("did we get here? 5");
 
-        kinfo(kstd::fmt("VFS: RamFS: written {} bytes @ %x", size, ramnode));
+        // kinfo(kstd::fmt("VFS: RamFS: written {} bytes @ %x", size, ramnode));
         return size;
     }
 
