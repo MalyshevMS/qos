@@ -6,13 +6,13 @@
 #include <klib/mem.hpp>
 #include <klib/string.hpp>
 
-namespace Kernel::FS {
+namespace Kernel::FS::VFS {
 
 using namespace kstd;
 
-VFSNode* vfs_root = nullptr;
+Node* vfs_root = nullptr;
 
-VFSNode* vfs_finddir(VFSNode* node, const char* name) {
+Node* vfs_finddir_default(Node* node, const char* name) {
     auto str = string(name);
     auto it = node->map.find(str);
 
@@ -21,14 +21,20 @@ VFSNode* vfs_finddir(VFSNode* node, const char* name) {
     return it.second();
 }
 
-void vfs_init() {
-    vfs_root = new VFSNode;
-    memset(vfs_root, 0, sizeof(VFSNode));
-    memcpy(vfs_root->name, "/", 2);
-    vfs_root->type = FS_DIR;
-    vfs_root->finddir = vfs_finddir;
+Node* create_node(const char* name) {
+    auto node = new Node;
+    memset(node, 0, sizeof(Node));
+    memcpy(node->name, name, strlen(name));
 
-    kinfo(fmt("VFS: '/'@%x", vfs_root));
+    kinfo(fmt("VFS: created new node '{}' @ %x", name, node));
+
+    return node;
 }
 
-}; // namespace Kernel::FS
+void init() {
+    vfs_root = create_node("/");
+    vfs_root->type = FS_DIR;
+    vfs_root->finddir = vfs_finddir_default;
+}
+
+}; // namespace Kernel::FS::VFS

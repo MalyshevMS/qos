@@ -35,20 +35,6 @@ using namespace FS;
 using namespace Syscall;
 using namespace kstd;
 
-uint32_t version_read(VFSNode* node, uint32_t offset, uint32_t size, uint8_t* buff) {
-    const char *data = "QOS v1.0\n";
-    uint32_t len = strlen(data);
-
-    if (offset >= len)
-        return 0; // End of file
-    if (offset + size > len)
-        size = len - offset; // Truncate
-
-    memcpy(buff, (uint8_t *)data + offset, size);
-
-    return size;
-}
-
 KERNEL_ENTRY
 void kernel_main() {
     x86::gdt_init();
@@ -95,32 +81,7 @@ void kernel_main() {
     INT_ENABLE;
     SHOW_INT_ENABLE;
 
-    vfs_init();
-
-    auto procfs = new VFSNode;
-    memset(procfs, 0, sizeof(VFSNode));
-    memcpy(procfs->name, "proc", 5);
-    procfs->type = FS_DIR;
-    procfs->finddir = vfs_finddir;
-
-    auto version = new VFSNode;
-    memset(version, 0, sizeof(VFSNode));
-    memcpy(version, "version", 8);
-    version->type = FS_FILE;
-    version->read = version_read;
-    version->size = 10;
-
-    vfs_root->map["proc"] = procfs;
-    procfs->map["version"] = version;
-
-    auto fproc = vfs_root->finddir(vfs_root, "proc");
-    auto fver = fproc->finddir(fproc, "version");
-
-    auto buf = new char[16];
-    auto sz = fver->read(fver, 0, 16, (uint8_t*)buf);
-    auto str = string(buf, sz);
-
-    kinfo(fmt("/proc/version.read: '{}'", str));
+    VFS::init();
 
     // Shouldn't be reached
     kwarn("You have reached the end of kernel control.");
