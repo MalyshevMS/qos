@@ -27,6 +27,8 @@
 #include <klib/map.hpp>
 #include <klib/string.hpp>
 
+#include <fs/ramfs.hpp>
+
 using namespace Kernel;
 using namespace Mem;
 using namespace Arch;
@@ -83,7 +85,15 @@ void kernel_main() {
 
     VFS::init();
 
-    // Shouldn't be reached
+    RamFS::mount();
+    RamFS::create_dir(RamFS::ramfs_root, "test");
+
+    auto ram_addr = VFS::vfs_root->finddir(VFS::vfs_root, "ram");
+    auto test_addr = ram_addr->finddir(ram_addr, "test");
+
+    kdebug(fmt("/ram: %x", ram_addr));
+    kdebug(fmt("/ram/test: %x", test_addr));
+
     kwarn("You have reached the end of kernel control.");
     for (;;)
         CPU_HALT;

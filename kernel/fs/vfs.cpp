@@ -12,7 +12,7 @@ using namespace kstd;
 
 Node* vfs_root = nullptr;
 
-Node* vfs_finddir_default(Node* node, const char* name) {
+Node* finddir_default(Node* node, const char* name) {
     auto str = string(name);
     auto it = node->map.find(str);
 
@@ -34,7 +34,7 @@ Node* create_node(const char* name) {
 void init() {
     vfs_root = create_node("/");
     vfs_root->type = FS_DIR;
-    vfs_root->finddir = vfs_finddir_default;
+    vfs_root->finddir = finddir_default;
 }
 
 }; // namespace Kernel::FS::VFS
