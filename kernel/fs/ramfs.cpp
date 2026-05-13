@@ -14,40 +14,25 @@ namespace Kernel::FS::RamFS {
     RamNode* ramfs_root = nullptr;
 
     static void ramnode_realloc(RamNode* node, uint32_t new_capacity) {
-        kwarn("Called ramnode_realloc()");
-        kwarn(fmt("Useful info: node=%x, buf=%x, cap={}, sz={}", node, node->buffer, node->capacity, node->size));
     
         if (new_capacity == 0) {
-            kwarn("new_capacity==0: deleting data");
             delete[] node->buffer;
             node->buffer = nullptr;
             node->capacity = 0;
             node->size = 0;
-            kwarn(fmt("ramnode_realloc() info: buff=%x, cap={}, sz={}",
-                       node->buffer, node->capacity, node->size));
             return;
         }
 
         uint8_t* new_data = new uint8_t[new_capacity];
-        kwarn(fmt("new_data allocated @ %x", new_data));
 
         if (node->buffer) {
             memcpy(new_data, node->buffer, node->size);
-            kwarn(fmt("Copied {} bytes from %x to %x", node->size, node->buffer, new_data));
             delete[] node->buffer;
         }
 
         node->buffer = new_data;
-        kwarn(fmt("Node buffer is now pointing to %x", node->buffer));
-        kwarn(fmt("cap={}, new_cap={}", node->capacity, new_capacity));
         node->capacity = new_capacity;
-        kwarn(fmt("cap={}, new_cap={}", node->capacity, new_capacity));
-        kwarn(fmt("cap={}, new_cap={}", node->capacity, new_capacity));
-        kwarn(fmt("cap={}, new_cap={}", node->capacity, new_capacity));
-        kwarn(fmt("cap={}, new_cap={}", node->capacity, new_capacity));
         
-        kwarn(fmt("ramnode_realloc() info: buff=%x, cap={}, sz={}",
-                   node->buffer, node->capacity, node->size));
     }
 
     static uint32_t ram_read(VFS::Node* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
@@ -64,9 +49,16 @@ namespace Kernel::FS::RamFS {
     static uint32_t ram_write(VFS::Node* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
         auto ramnode = static_cast<RamNode*>(node);
 
-        kwarn(fmt("VFS: RamFS: write info: addr=%x, off={}, sz={}, calc=%x", ramnode, offset, size, ramnode + offset));
 
-        if (offset + size > ramnode->capacity) ramnode_realloc(ramnode, (offset + size) * 2);
+        if (offset + size > ramnode->capacity) {
+            uint32_t new_capacity = (offset + size) * 2;
+            if (new_capacity < offset + size) new_capacity = offset + size;
+            ramnode_realloc(ramnode, new_capacity);
+        }
+
+        if (!ramnode->buffer) {
+            return 0;
+        }
 
         memcpy(ramnode->buffer + offset, buffer, size);
 
@@ -74,7 +66,7 @@ namespace Kernel::FS::RamFS {
             ramnode->size = offset + size;
         }
 
-        // kinfo(fmt("VFS: RamFS: written {} bytes @ %x", size, ramnode));
+        kinfo(fmt("VFS: RamFS: written {} bytes @ node %x, buffer @ %x", size, ramnode, ramnode->buffer));
         return size;
     }
 

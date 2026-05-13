@@ -88,10 +88,20 @@ void kernel_main() {
     VFS::init();
 
     RamFS::mount();
-    RamFS::create_file(static_cast<RamFS::RamNode*>(VFS::find_node("/ram")), "file.txt");
+    RamFS::create_dir(RamFS::ramfs_root, "dir");
+    RamFS::create_file(static_cast<RamFS::RamNode*>(VFS::find_node("/ram/dir")), "file.txt");
 
-    auto file = VFS::find_node("/ram/file.txt");
-    file->write(file, 0, 32, (uint8_t*)"Hello!");
+    auto file = VFS::find_node("/ram/dir/file.txt");
+    auto str = "Hello";
+    file->write(file, 0, strlen(str), (uint8_t*)str);
+
+    auto str2 = "World++!";
+    file->write(file, 2, strlen(str2), (uint8_t*)str2);
+
+    auto bf = new char[16];
+    auto sz = file->read(file, 0, 16, (uint8_t*)bf);
+    auto s = string(bf, sz);
+    kinfo(fmt("Read '/ram/dir/file.txt': {}", s));
 
     kwarn("You have reached the end of kernel control.");
     for (;;)
