@@ -7,8 +7,8 @@ namespace FS {
 namespace RamFS {
 
     struct RamNode : public VFS::Node {
-        uint8_t* buffer;
         uint32_t capacity;
+        uint8_t* buffer;
     };
 
 
