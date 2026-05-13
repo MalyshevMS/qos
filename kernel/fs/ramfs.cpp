@@ -1,6 +1,5 @@
 #include <klib/fmt.hpp>
 #include <klib/mem.hpp>
-#include <cstddef>
 #include <cstdint>
 #include <kernel/fs.hpp>
 #include <klib/string.hpp>
@@ -14,7 +13,7 @@ namespace Kernel::FS::RamFS {
     RamNode* ramfs_root = nullptr;
 
     static void ramnode_realloc(RamNode* node, uint32_t new_capacity) {
-    
+        kwarn(fmt("Entered realloc: node @ %x, ncap={}", node, new_capacity));
         if (new_capacity == 0) {
             delete[] node->buffer;
             node->buffer = nullptr;
@@ -24,8 +23,10 @@ namespace Kernel::FS::RamFS {
         }
 
         uint8_t* new_data = new uint8_t[new_capacity];
+        kwarn(fmt("Allocated new data @ %x", new_data));
 
         if (node->buffer) {
+            kwarn("Buffer not null, copying...");
             memcpy(new_data, node->buffer, node->size);
             delete[] node->buffer;
         }
@@ -53,6 +54,7 @@ namespace Kernel::FS::RamFS {
         if (offset + size > ramnode->capacity) {
             uint32_t new_capacity = (offset + size) * 2;
             if (new_capacity < offset + size) new_capacity = offset + size;
+            kwarn(fmt("REALLOC (cap={})", new_capacity));
             ramnode_realloc(ramnode, new_capacity);
         }
 
@@ -66,7 +68,7 @@ namespace Kernel::FS::RamFS {
             ramnode->size = offset + size;
         }
 
-        kinfo(fmt("VFS: RamFS: written {} bytes @ node %x, buffer @ %x", size, ramnode, ramnode->buffer));
+        kinfo(fmt("VFS: RamFS: written {} bytes @ node %x, buffer @ %x", size, ramnode, ramnode->buffer + offset));
         return size;
     }
 
