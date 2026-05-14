@@ -25,6 +25,9 @@ namespace VFS {
 
         Node* (*finddir)(Node* node, const char* name);
 
+        Node* (*create_file)(Node* node, const char* name);
+        Node* (*create_dir)(Node* node, const char* name);
+
         kstd::map<kstd::string, Node*> map;
 
         virtual ~Node() {}

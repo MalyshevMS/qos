@@ -1,4 +1,3 @@
-#include "klib/cstring.hpp"
 #include <cfg/asm.txx>
 #include <cfg/flags.txx>
 
@@ -88,20 +87,19 @@ void kernel_main() {
     VFS::init();
 
     RamFS::mount();
-    RamFS::create_dir(RamFS::ramfs_root, "dir");
-    RamFS::create_file(static_cast<RamFS::RamNode*>(VFS::find_node("/ram/dir")), "file.txt");
 
-    auto file = VFS::find_node("/ram/dir/file.txt");
-    auto str = "Hello";
-    file->write(file, 0, strlen(str), (uint8_t*)str);
+    auto ram = VFS::find_node("/ram");
+    auto test = ram->create_dir(ram, "test");
+    auto file = test->create_file(test, "file");
+    auto text = "Hello, World!";
+    file->write(file, 0, strlen(text), (uint8_t*)text);
 
-    auto str2 = "World123!";
-    file->write(file, strlen(str), strlen(str2), (uint8_t*)str2);
-
-    auto bf = new char[16];
-    auto sz = file->read(file, 0, 16, (uint8_t*)bf);
-    auto s = string(bf, sz);
-    kinfo(fmt("Read '/ram/dir/file.txt': {}", s));
+    auto path = "/ram/test/file";
+    auto found = VFS::find_node(path);
+    auto buffer = new char[32];
+    auto size = found->read(found, 0, 32, (uint8_t*)buffer);
+    auto str = string(buffer, size);
+    kinfo(fmt("Read '{}': {}", path, str));
 
     kwarn("You have reached the end of kernel control.");
     for (;;)

@@ -32,27 +32,41 @@ Node* create_node(const char* name) {
 }
 
 Node* find_node(const char* path) {
-    Node* current = nullptr;
-    if (path[0] == '/') current = vfs_root;
-    // TODO: check for ~ when you add /home/...
+    if (!path || path[0] == '\0') return nullptr;
 
-    auto len = strlen(path);
+    Node* current = vfs_root;
 
-    if (path[len - 1] == '/') len--;
-
-    string buffer = "";
-
-    for (int i = 1; i < len; i++) {
-        if (path[i] == '/') {
-            current = current->finddir(current, buffer.c_str());
-            if (!current) return nullptr;
-            buffer = "";
-        } else {
-            buffer += path[i];
-        }
+    size_t i = 0;
+    if (path[0] == '/') {
+        i = 1;
     }
 
-    current = current->finddir(current, buffer.c_str());
+    char buffer[256];
+    
+    while (path[i] != '\0') {
+        size_t b_idx = 0;
+
+        while (path[i] != '/' && path[i] != '\0' && b_idx < 255) {
+            buffer[b_idx++] = path[i++];
+        }
+        buffer[b_idx] = '\0';
+
+        if (path[i] == '/') {
+            while (path[i] == '/') i++;
+        }
+
+        if (b_idx > 0) {
+            if (current->type != FS_DIR) {
+                return nullptr;
+            }
+
+            Node* next = current->finddir(current, buffer);
+            if (!next) {
+                return nullptr;
+            }
+            current = next;
+        }
+    }
 
     return current;
 }

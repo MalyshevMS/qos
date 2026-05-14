@@ -68,11 +68,44 @@ namespace Kernel::FS::RamFS {
         return size;
     }
 
+    static VFS::Node* ram_create_file(VFS::Node* node, const char* name) {
+        auto file = static_cast<RamNode*>(node->finddir(node, name));
+        if (file != nullptr) return file;
+        
+        file = create_node(name);
+
+        file->type = VFS::FS_FILE;
+        file->read = ram_read;
+        file->write = ram_write;
+
+        node->map[name] = file;
+
+        return file;
+    }
+
+    static VFS::Node* ram_create_dir(VFS::Node* node, const char* name) {
+        auto dir = static_cast<RamNode*>(node->finddir(node, name));
+        if (dir != nullptr) return dir;
+        
+        dir = create_node(name);
+
+        dir->type = VFS::FS_DIR;
+        dir->finddir = VFS::finddir_default;
+        dir->create_file = ram_create_file;
+        dir->create_dir = ram_create_dir;
+
+        node->map[name] = dir;
+
+        return dir;
+    }
+
     void mount() {
         ramfs_root = create_node("ram");
         
         ramfs_root->finddir = VFS::finddir_default;
         ramfs_root->type = VFS::FS_DIR;
+        ramfs_root->create_file = ram_create_file;
+        ramfs_root->create_dir = ram_create_dir;
 
         kinfo(fmt("RamFS: mounted ramfs_root @ %x", ramfs_root));
 
@@ -84,36 +117,9 @@ namespace Kernel::FS::RamFS {
         memset(node, 0, sizeof(RamNode));
         memcpy(node->name, name, strlen(name));
 
+        kinfo(fmt("RamFS: created new node '{}' @ %x", name, node));
+
         return node;
-    }
-
-    RamNode* create_dir(RamNode* parent, const char* name) {
-        auto dir = static_cast<RamNode*>(parent->finddir(parent, name));
-        if (dir != nullptr) return dir;
-
-        dir = create_node(name);
-        
-        dir->finddir = VFS::finddir_default;
-        dir->type = VFS::FS_DIR;
-
-        parent->map[name] = dir;
-
-        return dir;
-    }
-
-    RamNode* create_file(RamNode* parent_dir, const char* name) {
-        auto file = static_cast<RamNode*>(parent_dir->finddir(parent_dir, name));
-        if (file != nullptr) return file;
-
-        file = create_node(name);
-
-        file->type = VFS::FS_FILE;
-        file->read = ram_read;
-        file->write = ram_write;
-
-        parent_dir->map[name] = file;
-
-        return file;
     }
 
 };
