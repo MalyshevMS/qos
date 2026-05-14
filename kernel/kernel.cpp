@@ -95,8 +95,8 @@ void kernel_main() {
     auto str = "Hello";
     file->write(file, 0, strlen(str), (uint8_t*)str);
 
-    auto str2 = "World++!";
-    file->write(file, 3, strlen(str2), (uint8_t*)str2);
+    auto str2 = "World123!";
+    file->write(file, strlen(str), strlen(str2), (uint8_t*)str2);
 
     auto bf = new char[16];
     auto sz = file->read(file, 0, 16, (uint8_t*)bf);

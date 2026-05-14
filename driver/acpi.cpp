@@ -120,6 +120,7 @@ bool poweroff() {
     val &= ~(7 << 10);  // Clear SLP_TYP field
     val |= (SLP_TYP << 10) | SLP_EN;
     
+    // Ignore a little bytes, because we are not terminating tasks at poweroff, so this is counted as leaked bytes
     kinfo(fmt("Leaked: {} bytes", Mem::leaked()));
     kinfo("Powered off.");
     outw(fadt->PM1a_CNT_BLK, val);

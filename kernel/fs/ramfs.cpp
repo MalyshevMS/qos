@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <kernel/fs.hpp>
 #include <klib/string.hpp>
+#include <klib/cstring.hpp>
 #include <fs/ramfs.hpp>
 #include <kernel/vconsole.hpp>
 
@@ -13,7 +14,6 @@ namespace Kernel::FS::RamFS {
     RamNode* ramfs_root = nullptr;
 
     static void ramnode_realloc(RamNode* node, uint32_t new_capacity) {
-        kwarn(fmt("Entered realloc: node @ %x, ncap={}", node, new_capacity));
         if (new_capacity == 0) {
             delete[] node->buffer;
             node->buffer = nullptr;
@@ -23,17 +23,14 @@ namespace Kernel::FS::RamFS {
         }
 
         uint8_t* new_data = new uint8_t[new_capacity];
-        kwarn(fmt("Allocated new data @ %x", new_data));
 
         if (node->buffer) {
-            kwarn("Buffer not null, copying...");
             memcpy(new_data, node->buffer, node->size);
             delete[] node->buffer;
         }
 
         node->buffer = new_data;
         node->capacity = new_capacity;
-        
     }
 
     static uint32_t ram_read(VFS::Node* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
@@ -54,7 +51,6 @@ namespace Kernel::FS::RamFS {
         if (offset + size > ramnode->capacity) {
             uint32_t new_capacity = (offset + size) * 2;
             if (new_capacity < offset + size) new_capacity = offset + size;
-            kwarn(fmt("REALLOC (cap={})", new_capacity));
             ramnode_realloc(ramnode, new_capacity);
         }
 
@@ -68,14 +64,21 @@ namespace Kernel::FS::RamFS {
             ramnode->size = offset + size;
         }
 
-        kinfo(fmt("VFS: RamFS: written {} bytes @ node %x, buffer @ %x", size, ramnode, ramnode->buffer + offset));
+        kinfo(fmt("VFS: RamFS: written {} bytes @ %x", size, ramnode->buffer + offset));
         return size;
     }
 
     void mount() {
-        ramfs_root = static_cast<RamNode*>(VFS::create_node("ram"));
+        ramfs_root = new RamNode;
+        memset(ramfs_root, 0, sizeof(RamNode));
+        memcpy(ramfs_root->name, "ram", 4);
+        
         ramfs_root->finddir = VFS::finddir_default;
         ramfs_root->type = VFS::FS_DIR;
+        ramfs_root->buffer = nullptr;
+        ramfs_root->capacity = 0;
+
+        kinfo(fmt("VFS: RamFS: mounted ramfs_root @ %x", ramfs_root));
 
         VFS::vfs_root->map["ram"] = ramfs_root;
     }
@@ -84,9 +87,15 @@ namespace Kernel::FS::RamFS {
         auto dir = static_cast<RamNode*>(parent->finddir(parent, name));
         if (dir != nullptr) return dir;
 
-        dir = static_cast<RamNode*>(VFS::create_node(name));
+        // TODO: create a function for RamNode creation
+        dir = new RamNode;
+        memset(dir, 0, sizeof(RamNode));
+        memcpy(dir->name, name, strlen(name));
+        
         dir->finddir = VFS::finddir_default;
         dir->type = VFS::FS_DIR;
+        dir->buffer = nullptr;
+        dir->capacity = 0;
 
         parent->map[name] = dir;
 
@@ -97,7 +106,10 @@ namespace Kernel::FS::RamFS {
         auto file = static_cast<RamNode*>(parent_dir->finddir(parent_dir, name));
         if (file != nullptr) return file;
 
-        file = static_cast<RamNode*>(VFS::create_node(name));
+        file = new RamNode;
+        memset(file, 0, sizeof(RamNode));
+        memcpy(file->name, name, strlen(name));
+        
         file->type = VFS::FS_FILE;
         file->read = ram_read;
         file->write = ram_write;
