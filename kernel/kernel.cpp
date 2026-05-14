@@ -89,17 +89,15 @@ void kernel_main() {
     RamFS::mount();
 
     auto ram = VFS::find_node("/ram");
-    auto test = ram->create_dir(ram, "test");
-    auto file = test->create_file(test, "file");
-    auto text = "Hello, World!";
-    file->write(file, 0, strlen(text), (uint8_t*)text);
+    for (int i = 0; i < 10; i++) {
+        ram->create_dir(ram, fmt("test{}", i).c_str());
+    }
 
-    auto path = "/ram/test/file";
-    auto found = VFS::find_node(path);
-    auto buffer = new char[32];
-    auto size = found->read(found, 0, 32, (uint8_t*)buffer);
-    auto str = string(buffer, size);
-    kinfo(fmt("Read '{}': {}", path, str));
+    VFS::Node* current = ram->readdir(ram, 0);
+    for (int i = 1; i < 10; i++) {
+        kprintln(fmt("Dir: {}", current->name));
+        current = current->readdir(current, i);
+    }
 
     kwarn("You have reached the end of kernel control.");
     for (;;)

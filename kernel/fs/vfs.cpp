@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <kernel/fs.hpp>
 #include <kernel/vconsole.hpp>
 #include <klib/cstring.hpp>
@@ -17,6 +18,15 @@ Node* finddir_default(Node* node, const char* name) {
     auto it = node->map.find(str);
 
     if (it == node->map.end()) return nullptr;
+
+    return it.second();
+}
+
+Node* readdir_default(Node* node, uint32_t index) {
+    if (index >= node->map.size()) return nullptr;
+
+    auto it = node->map.begin();
+    for (uint32_t i = 0; i < index; i++) it++;
 
     return it.second();
 }

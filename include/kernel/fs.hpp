@@ -24,6 +24,7 @@ namespace VFS {
         uint32_t (*write)(Node* node, uint32_t offset, uint32_t size, uint8_t* buffer);
 
         Node* (*finddir)(Node* node, const char* name);
+        Node* (*readdir)(Node* node, uint32_t index);
 
         Node* (*create_file)(Node* node, const char* name);
         Node* (*create_dir)(Node* node, const char* name);
@@ -36,6 +37,7 @@ namespace VFS {
     void init();
 
     Node* finddir_default(Node* node, const char* name);
+    Node* readdir_default(Node* node, uint32_t index);
     Node* create_node(const char* name);
     Node* find_node(const char* path);
 

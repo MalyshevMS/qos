@@ -91,6 +91,7 @@ namespace Kernel::FS::RamFS {
 
         dir->type = VFS::FS_DIR;
         dir->finddir = VFS::finddir_default;
+        dir->readdir = VFS::readdir_default;
         dir->create_file = ram_create_file;
         dir->create_dir = ram_create_dir;
 
@@ -103,6 +104,7 @@ namespace Kernel::FS::RamFS {
         ramfs_root = create_node("ram");
         
         ramfs_root->finddir = VFS::finddir_default;
+        ramfs_root->readdir = VFS::readdir_default;
         ramfs_root->type = VFS::FS_DIR;
         ramfs_root->create_file = ram_create_file;
         ramfs_root->create_dir = ram_create_dir;
