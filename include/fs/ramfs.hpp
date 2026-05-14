@@ -13,6 +13,7 @@ namespace RamFS {
 
 
     void mount();
+    RamNode* create_node(const char* name);
     RamNode* create_dir(RamNode* parent, const char* name);
     RamNode* create_file(RamNode* parent_dir, const char* name);
 

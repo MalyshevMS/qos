@@ -64,38 +64,37 @@ namespace Kernel::FS::RamFS {
             ramnode->size = offset + size;
         }
 
-        kinfo(fmt("VFS: RamFS: written {} bytes @ %x", size, ramnode->buffer + offset));
+        kinfo(fmt("RamFS: written {} bytes @ %x", size, ramnode->buffer + offset));
         return size;
     }
 
     void mount() {
-        ramfs_root = new RamNode;
-        memset(ramfs_root, 0, sizeof(RamNode));
-        memcpy(ramfs_root->name, "ram", 4);
+        ramfs_root = create_node("ram");
         
         ramfs_root->finddir = VFS::finddir_default;
         ramfs_root->type = VFS::FS_DIR;
-        ramfs_root->buffer = nullptr;
-        ramfs_root->capacity = 0;
 
-        kinfo(fmt("VFS: RamFS: mounted ramfs_root @ %x", ramfs_root));
+        kinfo(fmt("RamFS: mounted ramfs_root @ %x", ramfs_root));
 
         VFS::vfs_root->map["ram"] = ramfs_root;
+    }
+
+    RamNode* create_node(const char* name) {
+        auto node = new RamNode;
+        memset(node, 0, sizeof(RamNode));
+        memcpy(node->name, name, strlen(name));
+
+        return node;
     }
 
     RamNode* create_dir(RamNode* parent, const char* name) {
         auto dir = static_cast<RamNode*>(parent->finddir(parent, name));
         if (dir != nullptr) return dir;
 
-        // TODO: create a function for RamNode creation
-        dir = new RamNode;
-        memset(dir, 0, sizeof(RamNode));
-        memcpy(dir->name, name, strlen(name));
+        dir = create_node(name);
         
         dir->finddir = VFS::finddir_default;
         dir->type = VFS::FS_DIR;
-        dir->buffer = nullptr;
-        dir->capacity = 0;
 
         parent->map[name] = dir;
 
@@ -106,15 +105,11 @@ namespace Kernel::FS::RamFS {
         auto file = static_cast<RamNode*>(parent_dir->finddir(parent_dir, name));
         if (file != nullptr) return file;
 
-        file = new RamNode;
-        memset(file, 0, sizeof(RamNode));
-        memcpy(file->name, name, strlen(name));
-        
+        file = create_node(name);
+
         file->type = VFS::FS_FILE;
         file->read = ram_read;
         file->write = ram_write;
-        file->capacity = 0;
-        file->buffer = nullptr;
 
         parent_dir->map[name] = file;
 
