@@ -85,6 +85,7 @@ void init() {
     vfs_root = create_node("/");
     vfs_root->type = FS_DIR;
     vfs_root->finddir = finddir_default;
+    vfs_root->readdir = readdir_default;
 }
 
 }; // namespace Kernel::FS::VFS

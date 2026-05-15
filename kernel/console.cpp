@@ -5,11 +5,13 @@
 #include <kernel/vconsole.hpp>
 #include <kernel/task.hpp>
 #include <kernel/memory.hpp>
+#include <kernel/fs.hpp>
 #include <driver/keyboard.hpp>
 #include <driver/pci.hpp>
 #include <driver/disk.hpp>
 #include <driver/timer.hpp>
 #include <klib/conv.hpp>
+#include <klib/string.hpp>
 
 extern "C" void jump_to_user(uint32_t, uint32_t);
 
@@ -18,9 +20,11 @@ namespace Kernel::Console {
     using namespace kstd;
     using namespace Driver;
     using namespace Mem;
+    using namespace FS;
 
     static bool running = true;
     static string prompt;
+    static string pwd;
     static int prompt_y;
 
     static string get_command(const string& input) {
@@ -249,6 +253,67 @@ namespace Kernel::Console {
         Multitask::create_task(user_main, "Usermode", true);
     }
 
+    void cd(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: cd <absolute_path>");
+            return;
+        }
+
+        auto dir = FS::VFS::find_node(args.c_str());
+
+        if (!dir) {
+            kwarn(fmt("Path not found: {}", args));
+            return;
+        }
+
+        if (dir->type != VFS::FS_DIR) {
+            kwarn(fmt("Path {} is not a directory"));
+            return;
+        }
+
+        pwd = args;
+    }
+
+    void ls() {
+        auto dir = VFS::find_node(pwd.c_str());
+        for (int i = 0;; i++) {
+            auto node = dir->readdir(dir, i);
+            if (!node) return;
+            kprintln(fmt("{}", node->name));
+        }
+    }
+
+    void mkdir(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: mkdir <name>");
+            return;
+        }
+
+        auto dir = VFS::find_node(pwd.c_str());
+
+        if (!dir->create_dir) {
+            kwarn("Couldn't create directory: file system doesn't support mkdir");
+            return;
+        }
+
+        dir->create_dir(dir, args.c_str());
+    }
+
+    void touch(const string& args) {
+        if (args.empty()) {
+            kwarn("Usage: touch <name>");
+            return;
+        }
+
+        auto dir = VFS::find_node(pwd.c_str());
+        if (!dir->create_file) {
+            kwarn("Couldn't create file: file system doesn't support touch");
+            return;
+        }
+
+        dir->create_file(dir, args.c_str());
+    }
+
     void systemd() {
         kcolor(0x1F);
         clear();
@@ -382,6 +447,14 @@ namespace Kernel::Console {
             Timer::measure_jitter(samples);
         } else if (cmd == "jmp") {
             jmp();
+        } else if (cmd == "cd") {
+            cd(args);
+        } else if (cmd == "ls") {
+            ls();
+        } else if (cmd == "mkdir") {
+            mkdir(args);
+        } else if (cmd == "touch") {
+            touch(args);
         } else if (cmd == "poweroff" || cmd == "exit") {
             Hardware::poweroff();
             kprintln("If you see this message, your ACPI controller is broken");
@@ -394,7 +467,8 @@ namespace Kernel::Console {
 
     void init() {
         running = true;
-        prompt = "(kernel)> ";
+        pwd = "/";
+        prompt = fmt("(kernel @ {})> ", pwd);
 
         kdebug("Welcome to QOS!");
         kprintln("You are now in kernel console.");
@@ -437,6 +511,7 @@ namespace Kernel::Console {
                     if (!running) break;
 
                     input.clear();
+                    prompt = fmt("(kernel @ {})> ", pwd);
                     kprint(prompt);
                     int cx, cy;
                     get_cursor(cx, cy);

@@ -88,16 +88,8 @@ void kernel_main() {
 
     RamFS::mount();
 
-    auto ram = VFS::find_node("/ram");
-    for (int i = 0; i < 10; i++) {
-        ram->create_dir(ram, fmt("test{}", i).c_str());
-    }
-
-    VFS::Node* current = ram->readdir(ram, 0);
-    for (int i = 1; i < 10; i++) {
-        kprintln(fmt("Dir: {}", current->name));
-        current = current->readdir(current, i);
-    }
+    Console::init();
+    Console::run();
 
     kwarn("You have reached the end of kernel control.");
     for (;;)
